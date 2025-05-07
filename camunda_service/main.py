@@ -320,7 +320,6 @@ async def main():
     def send_to_proofing_service() -> None:
         """
         This function simulates sending the data to a proofing service.
-        In a real-world scenario, you would implement the actual logic here.
         """
         # Simulate sending data to a proofing service
         print("Sending data to proofing service...")
