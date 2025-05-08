@@ -5,7 +5,7 @@ import uuid
 import json
 
 from typing import Dict, List, Any, Optional, Union
-from pyzeebe import ZeebeWorker, Job, JobController, create_insecure_channel
+from pyzeebe import ZeebeWorker, Job, JobController, create_insecure_channel, ZeebeClient
 from cryptography.hazmat.primitives import (
     hashes,
     serialization,
@@ -15,9 +15,6 @@ from cryptography.hazmat.primitives.asymmetric import (
     padding,
 )
 from cryptography.hazmat.backends import default_backend  #
-
-
-all_tce_data: List[Dict[str, Any]] = []
 
 CITIES = [
     "Berlin",
@@ -188,15 +185,16 @@ def calculate_emissions(transport_activity_val: float) -> Dict:
 
 async def main():
     channel = create_insecure_channel(grpc_address="localhost:26500")
+    client = ZeebeClient(channel)
     worker = ZeebeWorker(channel)
 
     @worker.task(task_type="produce_data", exception_handler=on_error)
     def produce_data(
-        shipment_id: str = f"SHIP_{uuid.uuid4()}",
-        mass_kg: float = random.uniform(1000, 20000),
-        distance_km: float = random.uniform(10, 1000),
-        prev_tce_id: Optional[Union[str, List[str]]] = None,
-        start_time: Optional[datetime.datetime] = None,
+            shipment_id: str = f"SHIP_{uuid.uuid4()}",
+            mass_kg: float = random.uniform(1000, 20000),
+            distance_km: float = random.uniform(10, 1000),
+            prev_tce_id: Optional[Union[str, List[str]]] = None,
+            start_time: Optional[datetime.datetime] = None,
     ) -> Dict:
         """
         Generate transport carbon emission (TCE) data for a shipment.
@@ -312,27 +310,41 @@ async def main():
 
         # Store and return result
         shipment_key = f"SHIP_{uuid.uuid4()}"
-        all_tce_data.append({shipment_key: result_dict})
 
-        return all_tce_data[-1]
+        return {shipment_key: result_dict}
 
     @worker.task(task_type="send_to_proofing_service", exception_handler=on_error)
-    def send_to_proofing_service() -> None:
+    def send_to_proofing_service(**variables) -> None:
         """
         This function simulates sending the data to a proofing service.
         """
         # Simulate sending data to a proofing service
         print("Sending data to proofing service...")
+        shipment_data = {
+            key: value for key, value in variables.items()
+            if key.startswith("SHIP_")
+        }
         # Here you would implement the actual logic to send the data
         # For example, using an HTTP request
-        print(all_tce_data)
 
         with open("activities.json", "w", encoding="utf-8") as f:
-            json.dump(all_tce_data, f, indent=4, ensure_ascii=False)
+            json.dump(shipment_data, f, indent=4, ensure_ascii=False)
 
         return {
             "message": "Data sent to proofing service successfully.",
         }
+
+    @worker.task(task_type="notify_next_node", exception_handler=on_error)
+    async def notify_next_node(message_name: str, shipment_id: str = None) -> None:
+        print(f"message_name: {message_name}")
+        shipment_id = shipment_id if shipment_id else f"SHIP_ALL_{uuid.uuid4()}"
+        # Publish the message to start Process B (message name = 'start-process-b')
+        await client.publish_message(
+            name=message_name,
+            correlation_key=f"case-1-{shipment_id}",
+            variables={"shipment_id": shipment_id}
+        )
+        print(f"Published message {message_name} with shipment ID: {shipment_id}")
 
     # Start the worker
     await worker.work()
