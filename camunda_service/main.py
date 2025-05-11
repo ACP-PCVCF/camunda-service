@@ -17,6 +17,15 @@ async def main():
     client = ZeebeClient(channel)
     worker = ZeebeWorker(channel)
 
+    @worker.task(task_type="determine_job_sequence", exception_handler=on_error)
+    def determine_job_sequence():
+        subprocesses = [
+            "case_1_with_tsp",
+            "case_2_with_tsp",
+            "case_3_with_tsp",
+        ]
+        return {"subprocess_identifiers": subprocesses}
+
     @worker.task(task_type="produce_data", exception_handler=on_error)
     def produce_data(
             shipment_id: str,
@@ -140,7 +149,7 @@ async def main():
         return {tce_id: result_dict}
 
     @worker.task(task_type="send_to_proofing_service", exception_handler=on_error)
-    def send_to_proofing_service(**variables) -> dict[str, str]:
+    def send_to_proofing_service(**variables) -> dict[str, str | dict]:
         """
         This function simulates sending the data to a proofing service.
         """
@@ -157,7 +166,10 @@ async def main():
             json.dump(shipment_data, f, indent=4, ensure_ascii=False)
 
         return {
-            "message": "Data sent to proofing service successfully.",
+            "instance_scf": {
+                "proof": "proof",
+                "pcf": random.uniform(0, 1000),
+            },
         }
 
     @worker.task(task_type="notify_next_node", exception_handler=on_error)
@@ -166,8 +178,25 @@ async def main():
         # Publish the message to start Process B (message name = 'start-process-b')
         await client.publish_message(
             name=message_name,
-            correlation_key=f"case-1-{shipment_id}",
+            correlation_key=f"{message_name}-{shipment_id}",
             variables={"shipment_id": shipment_id}
+        )
+        print(f"Published message {message_name} with shipment ID: {shipment_id}")
+
+    @worker.task(
+        task_type="send_data_to_origin")
+    async def send_data_to_origin(
+            shipment_id: str,
+            message_name: str,
+            tce_data: dict,
+    ):
+        await client.publish_message(
+            name=message_name,
+            correlation_key=shipment_id,
+            variables={
+                "shipment_id": shipment_id,
+                "tce_data": tce_data
+            }
         )
         print(f"Published message {message_name} with shipment ID: {shipment_id}")
 
