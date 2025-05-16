@@ -1,10 +1,10 @@
 # Camunda Service
 
-A Python-based microservice for handling Camunda/Zeebe workflow tasks in a transport carbon emission (TCE) tracking system. This service connects to a Zeebe workflow engine and processes various tasks including data collection, verification, and proof of carbon footprint data.
+A Python-based microservice for handling Camunda/Zeebe workflow tasks in a transport carbon emission (TCE) tracking system. This service connects to a Zeebe workflow engine and orchestrates interactions with various external services for sensor data collection, sensor verification, and carbon footprint proofing.
 
 ## Overview
 
-This service implements a worker that connects to Camunda 8 Zeebe engine. It focuses on processing transport carbon emission data, generating proofs, and communicating with other services in the ecosystem.
+This service implements a worker that connects to Camunda 8 Zeebe engine. It acts as an orchestrator that calls various external services including the sensor data service for transportation data, the certification service for sensor verification, and the proofing service to obtain Product Carbon Footprint (PCF) data and proofs.
 
 ## Requirements
 
@@ -45,9 +45,9 @@ Edit the configuration settings in `config/settings.py` to match your environmen
 ├── services/               # Service implementations
 │   ├── http_client.py      # HTTP client
 │   └── service_implementations/
-│       ├── service_proofing.py       # Proofing service
-│       ├── service_sensordata.py     # Sensor data service
-│       └── service_sensor_certificate.py # Sensor certificate service
+│       ├── service_proofing.py       # Client for calling the external proofing service
+│       ├── service_sensordata.py     # Client for calling the external sensor data service
+│       └── service_sensor_certificate.py # Client for calling the external sensor certification service
 ├── tasks/                  # Zeebe worker task implementations
 ├── tests/                  # Unit and integration tests (to be done)
 └── utils/                  # Utility functions
