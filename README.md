@@ -1,0 +1,89 @@
+# Camunda Service
+
+A Python-based microservice for handling Camunda/Zeebe workflow tasks in a transport carbon emission (TCE) tracking system. This service connects to a Zeebe workflow engine and processes various tasks including data collection, verification, and proof of carbon footprint data.
+
+## Overview
+
+This service implements a worker that connects to Camunda 8 Zeebe engine. It focuses on processing transport carbon emission data, generating proofs, and communicating with other services in the ecosystem.
+
+## Requirements
+
+- Python 3.10+
+- Zeebe Server (Camunda 8 Platform)
+- Camunda Modeler
+- Dependencies listed in `requirements.txt`
+
+## Installation
+
+1. Clone this repository
+2. Create a virtual environment (recommended)
+   ```
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+3. Install dependencies
+   ```
+   pip install -r requirements.txt
+   ```
+
+## Configuration
+
+Edit the configuration settings in `config/settings.py` to match your environment:
+
+- `ZEEBE_ADDRESS`: The address of your Zeebe gateway
+- `LOG_LEVEL`: Logging level (DEBUG, INFO, WARNING, ERROR)
+
+## Project Structure
+
+```
+├── bpmn/                   # BPMN workflow definitions
+├── config/                 # Configuration settings
+├── logs/                   # Log files
+├── main.py                 # Main entry point
+├── models/                 # Data models
+├── requirements.txt        # Project dependencies
+├── services/               # Service implementations
+│   ├── http_client.py      # HTTP client
+│   └── service_implementations/
+│       ├── service_proofing.py       # Proofing service
+│       ├── service_sensordata.py     # Sensor data service
+│       └── service_sensor_certificate.py # Sensor certificate service
+├── tasks/                  # Zeebe worker task implementations
+├── tests/                  # Unit and integration tests (to be done)
+└── utils/                  # Utility functions
+    ├── data_utils.py       # Data processing utilities
+    ├── error_handling.py   # Error handlers
+    └── logging_utils.py    # Logging configuration
+```
+
+## Usage
+
+Start the service by running:
+
+```
+python main.py
+```
+
+The service will:
+
+1. Connect to the configured Zeebe gateway
+2. Register task handlers for all workflow tasks
+3. Begin processing tasks from the workflow engine
+
+## Development
+
+### Adding New Tasks
+
+To add a new task:
+
+1. Implement the task function in `tasks/worker_tasks.py`
+2. Register the task in the `_register_tasks` method
+3. Update your BPMN workflow to include the new task
+
+### Testing (to be done)
+
+Run the tests using:
+
+```
+python -m unittest discover tests
+```
