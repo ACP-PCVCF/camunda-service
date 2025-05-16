@@ -1,19 +1,16 @@
-from typing import Dict, List, Optional, Union
-from dataclasses import dataclass
+from typing import Dict, List, Optional
+from pydantic import BaseModel, Field
 
-
-@dataclass
-class Location:
-    """Data class for location information."""
+class Location(BaseModel):
+    """Model for location information."""
     type: str = "PhysicalLocation"
     locationName: str = ""
-    countryCode: str = "DE"
+    countryCode: str = Field(default="DE", min_length=2, max_length=2)
     postalCode: str = ""
     city: str = ""
 
-@dataclass
-class TCEData:
-    """Data class for Transport Carbon Emission (TCE) data."""
+class TCEData(BaseModel):
+    """Model for Transport Carbon Emission (TCE) data."""
     tceId: str
     shipmentId: str
     mass: str
@@ -44,9 +41,8 @@ class TCEData:
     ch4TTW: Optional[str] = None
     pmTTW: Optional[str] = None
 
-@dataclass
-class SignedTCEData:
-    """Data class for signed TCE data with cryptographic information."""
+class SignedTCEData(BaseModel):
+    """Model for signed TCE data with cryptographic information."""
     activityDataJson: str
     activitySignature: str
     activityPublicKeyPem: str
