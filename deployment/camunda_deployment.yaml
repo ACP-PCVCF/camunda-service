@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camunda-service-deployment
+  labels:
+    app: camunda-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: camunda-service
+  template:
+    metadata:
+      labels:
+        app: camunda-service
+    spec:
+      containers:
+      - name: camunda-service
+        image: camunda-test:latest # Ersetzen Sie dies durch Ihr Image
+        imagePullPolicy: IfNotPresent
+        ports:
+         - containerPort: 8000 # Beispiel, falls Sie einen Webserver hinzufügen
+        env:
+        - name: ZEEBE_ADDRESS
+          value: "camunda-platform-zeebe-gateway.default.svc.cluster.local:26500" # Anpassen an Ihren Zeebe-Gateway-Service
+        - name: PROOFING_SERVICE_API_URL
+          value: "https://a8ee00c5-7d3c-40eb-85f3-0a6d73adc415.mock.pstmn.io/api/proofing" # Anpassen an die URL Ihres Proofing-Dienstes im Cluster
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: ACTIVITIES_OUTPUT_PATH
+          value: "/app/activities.json" # Pfad innerhalb des Containers
+        - name: REQUEST_TIMEOUT
+          value: "30"

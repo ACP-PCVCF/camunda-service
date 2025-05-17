@@ -117,9 +117,10 @@ class CamundaWorkerTasks:
         
         # Call the proofing service
         result = self.proofing_service.send_to_proofing(shipment_data)
+        result_data = result.dict()
         
-        log_task_completion("send_to_proofing_service", **result)
-        return result
+        log_task_completion("send_to_proofing_service", **result_data)
+        return result_data
     
     async def notify_next_node(self, message_name: str, shipment_id: str = None) -> None:
         """
