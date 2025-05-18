@@ -33,28 +33,6 @@ Edit the configuration settings in `config/settings.py` to match your environmen
 - `ZEEBE_ADDRESS`: The address of your Zeebe gateway
 - `LOG_LEVEL`: Logging level (DEBUG, INFO, WARNING, ERROR)
 
-## Project Structure
-
-```
-├── bpmn/                   # BPMN workflow definitions
-├── config/                 # Configuration settings
-├── logs/                   # Log files
-├── main.py                 # Main entry point
-├── models/                 # Data models
-├── requirements.txt        # Project dependencies
-├── services/               # Service implementations
-│   ├── http_client.py      # HTTP client
-│   └── service_implementations/
-│       ├── service_proofing.py       # Client for calling the external proofing service
-│       ├── service_sensordata.py     # Client for calling the external sensor data service
-│       └── service_sensor_certificate.py # Client for calling the external sensor certification service
-├── tasks/                  # Zeebe worker task implementations
-├── tests/                  # Unit and integration tests (to be done)
-└── utils/                  # Utility functions
-    ├── data_utils.py       # Data processing utilities
-    ├── error_handling.py   # Error handlers
-    └── logging_utils.py    # Logging configuration
-```
 
 ## Usage
 
