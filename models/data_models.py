@@ -54,14 +54,14 @@ class SignedTCEData(BaseModel):
 class InstanceSCF(BaseModel):
     """Model for SCF data."""
     proof: str
-    pcf: float
+    pcf: float | int
 
 
 class ProofingResult(BaseModel):
     """Model für das Ergebnis des Proofing-Services."""
     request_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     instance_scf: InstanceSCF
-    timestamp: str
-    status: str = "success"
+    timestamp: str | None = None
+    status: str | int = 200
 
 
