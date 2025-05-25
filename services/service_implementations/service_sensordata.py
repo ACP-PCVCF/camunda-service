@@ -3,6 +3,7 @@ import json
 import random
 import uuid
 from typing import Dict, List, Optional, Union
+import requests
 
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 
@@ -10,6 +11,10 @@ from models.data_models import SignedTCEData
 from utils.data_utils import convert_sets_to_lists, create_crypto_keys, sign_data
 from utils.logging_utils import log_service_call
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # This is a mock implementation, in production this would be replaced with real data
 CITIES = [
@@ -100,7 +105,7 @@ class SensorDataService:
     
     def __init__(self):
         log_service_call("SensorDataService", "__init__")
-        # Initialize service if needed
+        self.base_url = os.getenv("SENSOR_SERVICE_API_URL", "localhost:8080")
 
     def call_service_sensordata(
             self,
@@ -109,7 +114,14 @@ class SensorDataService:
     # Call the service to get sensor data
         print(f"Calling sensor data service for shipment {shipment_id} with sensor {sensor_id}")
 
-
+    def fetch_sensor_data(self, variables):
+        shipment_id = variables.get("shipment_id", "unknown")
+        response = requests.post(
+            f"{self.base_url}/api/v1/sensor-data",
+            json={"shipment_id": shipment_id}
+        )
+        print(f"Sensor data fetched for shipment {shipment_id} with response {response.status_code} - {response.text}")
+        return response.json()
 
     def get_mock_sensor_data(
             self,

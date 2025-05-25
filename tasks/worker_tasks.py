@@ -68,13 +68,7 @@ class CamundaWorkerTasks:
         #log_task_start("call_service_sensordata", shipment_id=shipment_id, sensor_id=sensor_id)
         # Instead of the inline implementation, call the service
         # In the future, this would call the real sensor data service
-        result = self.sensor_data_service.get_mock_sensor_data(
-            shipment_id=shipment_id,
-            mass_kg=None or random.uniform(1000, 20000),
-            distance_km=None or random.uniform(10, 1000),
-            prev_tce_id=None,
-            start_time=None
-        )
+        result = self.sensor_data_service.fetch_sensor_data({"shipment_id": shipment_id})
 
         #log_task_completion("call_service_sensordata", **result)
 
