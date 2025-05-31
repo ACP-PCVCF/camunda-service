@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 import uuid
+from enum import Enum
 
 
 class Location(BaseModel):
@@ -98,3 +99,68 @@ class ProductFootprint(BaseModel):
     pcf: Optional[float] = None
     comment: str = ""
     extensions: List[Extension] = Field(default_factory=list)
+
+
+class EnergyCarriers(BaseModel):
+    energyCarrier: str
+    relativeShare: str
+    emissionFactorWTW: str
+    emissionFactorTTW: str
+
+
+class CertificationEnum(str, Enum):
+    ISO14083_2023 = "ISO14083:2023"
+    GLECv2 = "GLECv2"
+    GLECv3 = "GLECv3"
+    GLECv3_1 = "GLECv3.1"
+
+
+class TransportMode(str, Enum):
+    ROAD = "road"
+    AIR = "air"
+    SEA = "sea"
+    RAIL = "rail"
+
+
+class TocData(BaseModel):
+    tocId: str
+    certifications: list[CertificationEnum]
+    description: str
+    mode: TransportMode
+    loadFactor: str
+    emptyDistanceFactor: str
+    temperatureControl: str
+    truckLoadingSequence: str
+    airShippingOption: Optional[str]
+    flightLength: Optional[str]
+    energyCarriers: list[EnergyCarriers]
+    co2eIntensityWTW: str
+    co2eIntensityTTW: str
+    transportActivityUnit: str
+
+
+class HocData(BaseModel):
+    hocId: str
+    passhubType: str
+    energyCarriers: list[EnergyCarriers]
+    co2eIntensityWTW: str
+    co2eIntensityTTW: str
+    hubActivityUnit: str
+
+
+class SensorData(BaseModel):
+    pass
+
+
+class TceSensorData(BaseModel):
+    tceId: str
+    sensorkey: str
+    signedSensorData: str
+    sensorData: SensorData
+
+
+class ProofingDocument(BaseModel):
+    productFootprint: ProductFootprint
+    tocData: list[TocData]
+    hocData: list[HocData]
+    signedSensorData: Optional[list[TceSensorData]] = None
