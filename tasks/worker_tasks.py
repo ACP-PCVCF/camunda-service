@@ -37,16 +37,16 @@ class CamundaWorkerTasks:
                          exception_handler=on_error)(self.notify_next_node)
         self.worker.task(task_type="send_data_to_origin",
                          exception_handler=on_error)(self.send_data_to_origin)
-        self.worker.task(task_type="set_shipment_id",
-                         exception_handler=on_error)(self.set_shipment_id)
         self.worker.task(task_type="define_product_footprint_template",
                          exception_handler=on_error)(self.define_product_footprint_template)
         self.worker.task(task_type="hub_procedure",
                          exception_handler=on_error)(self.hub_procedure)
         self.worker.task(task_type="transport_procedure",
                          exception_handler=on_error)(self.transport_procedure)
+        self.worker.task(task_type="set_shipment_information",
+                         exception_handler=on_error)(self.set_shipment_information)
 
-    def collect_hoc_toc_data(product_footprint: dict):
+    def collect_hoc_toc_data(self, product_footprint: dict):
 
         get_hoc_toc_ids = []
 
