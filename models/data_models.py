@@ -1,5 +1,7 @@
 from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
+import uuid
+
 
 class Location(BaseModel):
     """Model for location information."""
@@ -8,6 +10,7 @@ class Location(BaseModel):
     countryCode: str = Field(default="DE", min_length=2, max_length=2)
     postalCode: str = ""
     city: str = ""
+
 
 class TCEData(BaseModel):
     """Model for Transport Carbon Emission (TCE) data."""
@@ -24,7 +27,7 @@ class TCEData(BaseModel):
     destination: Dict
     departureAt: str
     arrivalAt: str
-    
+
     # Optional fields with default values
     tocId: Optional[str] = None
     hocId: Optional[str] = None
@@ -41,8 +44,57 @@ class TCEData(BaseModel):
     ch4TTW: Optional[str] = None
     pmTTW: Optional[str] = None
 
+
 class SignedTCEData(BaseModel):
     """Model for signed TCE data with cryptographic information."""
     activityDataJson: str
     activitySignature: str
     activityPublicKeyPem: str
+
+
+class Distance(BaseModel):
+    actual: Optional[float] = None
+    gcd: Optional[float] = None
+    sfd: Optional[float] = None
+
+
+class TCE(BaseModel):
+    tceId: int
+    prevTceIds: List[str] = []
+    hocId: Optional[str]
+    tocId: Optional[str]
+    shipmentId: str
+    mass: int
+    co2eWTW: Optional[float] = None
+    co2eTTW: Optional[float] = None
+    transportActivity: Optional[float] = None
+    distance: Optional[Distance] = None
+
+
+class ExtensionData(BaseModel):
+    mass: float
+    shipmentId: str
+    tces: List[TCE] = Field(default_factory=list)
+
+
+class Extension(BaseModel):
+    specVersion: str = "2.0.0"
+    dataSchema: str
+    data: ExtensionData
+
+
+class ProductFootprint(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    specVersion: str = "2.0.0"
+    version: int = 0
+    created: str
+    status: str = "Active"
+    companyName: str
+    companyIds: List[str]
+    productDescription: str
+    productIds: List[str]
+    productCategoryCpc: int
+    productNameCompany: str
+    pcf: Optional[float] = None
+    comment: str = ""
+    extensions: List[Extension] = Field(default_factory=list)

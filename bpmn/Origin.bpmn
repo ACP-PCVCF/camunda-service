@@ -7,7 +7,7 @@
     <bpmn:sequenceFlow id="Flow_0tblrxd" sourceRef="StartEvent_1" targetRef="Activity_06hon9k" />
     <bpmn:serviceTask id="Activity_06hon9k" name="Define Shipment ID">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="set_shipment_id" />
+        <zeebe:taskDefinition type="set_shipment_parameters" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0tblrxd</bpmn:incoming>
       <bpmn:outgoing>Flow_1np87sh</bpmn:outgoing>
