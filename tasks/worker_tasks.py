@@ -1,17 +1,14 @@
 import random
 import uuid
 import datetime
-import json
 from typing import Dict
-
 from pyzeebe import ZeebeWorker, ZeebeClient
-
 from services.service_implementations.service_proofing import ProofingService
 from services.service_implementations.service_sensordata import SensorDataService
 from utils.error_handling import on_error
 from utils.logging_utils import log_task_start, log_task_completion
-
-from models.data_models import ProductFootprint, TCE, Distance
+from utils.data_utils import get_mock_data
+from models.data_models import ProductFootprint, TCE, Distance, Extension, ExtensionData, ProofingDocument
 
 
 class CamundaWorkerTasks:
@@ -46,22 +43,32 @@ class CamundaWorkerTasks:
                          exception_handler=on_error)(self.transport_procedure)
         self.worker.task(task_type="set_shipment_information",
                          exception_handler=on_error)(self.set_shipment_information)
+        self.worker.task(task_type="collect_hoc_toc_data",
+                         exception_handler=on_error)(self.collect_hoc_toc_data)
 
     def collect_hoc_toc_data(self, product_footprint: dict):
 
-        get_hoc_toc_ids = []
-
         product_footprint_verified = ProductFootprint.model_validate(
             product_footprint)
+
+        proofingDocument = ProofingDocument(
+            productFootprint=product_footprint_verified, tocData=[], hocData=[])
         for ids in product_footprint_verified.extensions[0].data.tces:
             if ids.tocId is not None:
-                get_hoc_toc_ids.append(ids.tocId)
+                proofingDocument.tocData.append(get_mock_data(ids.tocId))
             if ids.hocId is not None:
-                get_hoc_toc_ids.append(ids.hocId)
+                proofingDocument.hocData.append(get_mock_data(ids.hocId))
 
-        # call database and retrieve all hoc and toc data
+        result = {
+            "proofing_document": proofingDocument.model_dump()
+        }
+
+        return result
 
     def transport_procedure(self, tocId: int, product_footprint: dict) -> dict:
+
+        log_task_start("transport_procedure", tocId=tocId,
+                       product_footprint=product_footprint)
 
         # call greta
         distance_from_sensor = random.uniform(10, 1000)
@@ -69,12 +76,11 @@ class CamundaWorkerTasks:
         product_footprint_verified = ProductFootprint.model_validate(
             product_footprint)
 
-        # product_footprint_verified = ProductFootprint.model_validate_json(
-        #   product_footprint)
-
         prev_tce_ids = []
-        if product_footprint_verified.extensions[0].data.tces is not None:
-            prev_tce_ids = product_footprint_verified.extensions[0].data.tces[-1].prevTceIds
+
+        if len(product_footprint_verified.extensions[0].data.tces) > 0:
+            prev_tce_ids = product_footprint_verified.extensions[0].data.tces[-1].prevTceIds.copy(
+            )
             last_tceid = product_footprint_verified.extensions[0].data.tces[-1].tceId
 
             prev_tce_ids.append(last_tceid)
@@ -86,7 +92,7 @@ class CamundaWorkerTasks:
             distance=Distance(
                 actual=distance_from_sensor
             ),
-            toc=tocId,
+            tocId=tocId,
             prevTceIds=prev_tce_ids
         )
 
@@ -97,6 +103,8 @@ class CamundaWorkerTasks:
         result = {
             "product_footprint": product_footprint_verified.model_dump()
         }
+
+        log_task_completion("transport_procedure", **result)
 
         return result
 
@@ -112,12 +120,16 @@ class CamundaWorkerTasks:
             product_footprint with HocId Information
         """
 
+        log_task_start("hub_procedure", hocId=hocId,
+                       product_footprint=product_footprint)
+
         product_footprint_verified = ProductFootprint.model_validate(
             product_footprint)
 
         prev_tce_ids = []
         if len(product_footprint_verified.extensions[0].data.tces) > 0:
-            prev_tce_ids = product_footprint_verified.extensions[0].data.tces[-1].prevTceIds
+            prev_tce_ids = product_footprint_verified.extensions[0].data.tces[-1].prevTceIds.copy(
+            )
             last_tceid = product_footprint_verified.extensions[0].data.tces[-1].tceId
 
             prev_tce_ids.append(last_tceid)
@@ -129,14 +141,16 @@ class CamundaWorkerTasks:
             hocId=hocId,
             prevTceIds=prev_tce_ids
         )
-
+        print("New TCE:")
+        print(new_TCE.prevTceIds)
         product_footprint_verified.extensions[0].data.tces.append(
             new_TCE
         )
-        hallo = product_footprint_verified.model_dump()
         result = {
             "product_footprint": product_footprint_verified.model_dump()
         }
+
+        log_task_completion("hub_procedure", **result)
 
         return result
 
@@ -149,34 +163,33 @@ class CamundaWorkerTasks:
         """
         log_task_start("define_product_footprint_template")
 
+        product_footprint = ProductFootprint(
+            id=str(uuid.uuid4()),
+            created=datetime.datetime.now().isoformat(),
+            specVersion="2.0.0",
+            version=0,
+            status="Active",
+            companyName=company_name,
+            companyIds=[f"urn:epcidsgln:{uuid.uuid4()}"],
+            productDescription=f"Logistics emissions related to shipment with ID {shipment_information.get('shipment_id', 'unknown')}",
+            productIds=[
+                f"urn:pathfinder:product:customcode:vendor-assigned:{uuid.uuid4()}"],
+            productCategoryCpc=random.randint(1000, 9999),
+            productNameCompany=f"Shipment with ID {shipment_information.get('shipment_id', 'unknown')}",
+            extensions=[
+                Extension(
+                    dataSchema="https://api.ileap.sine.dev/shipment-footprint.json",
+                    data=ExtensionData(
+                        mass=shipment_information.get(
+                            "shipment_weight", random.uniform(1000, 20000)),
+                        shipmentId=shipment_information.get(
+                            "shipment_id", f"SHIP_{uuid.uuid4()}")
+                    )
+                )
+            ]
+        )
         result = {
-            "product_footprint": {
-                "id": str(uuid.uuid4()),
-                "specVersion": "2.0.0",
-                "version": 0,
-                "created": datetime.datetime.now().isoformat(),
-                "status": "Active",
-                "companyName": company_name,
-                "companyIds": [f"urn:epcidsgln: {uuid.uuid4()}"],
-                "productDescription": f"Logistics emissions related to shipment with ID {shipment_information.get('shipment_id', 'unknown')}",
-                "productIds": [f"urn:pathfinder:product:customcode:vendor-assigned: {uuid.uuid4()}"],
-                # Random CPC code
-                "productCategoryCpc": random.randint(1000, 9999),
-                "productNameCompany": f"Shipment with ID {shipment_information.get('shipment_id', 'unknown')}",
-                "pcf": None,
-                "comment": "",
-                "extensions": [
-                    {
-                        "specVersion": "2.0.0",
-                        "dataSchema": "https://api.ileap.sine.dev/shipment-footprint.json",
-                        "data": {
-                            "mass": shipment_information.get("shipment_weight", random.uniform(1000, 20000)),
-                            "shipmentId": shipment_information.get("shipment_id", f"SHIP_{uuid.uuid4()}"),
-                            "tces": []
-                        }
-                    }
-                ]
-            }
+            "product_footprint": product_footprint.model_dump()
         }
 
         log_task_completion("define_product_footprint_template", **result)
