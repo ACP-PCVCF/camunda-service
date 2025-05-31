@@ -9,7 +9,7 @@
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="transport_procedure" />
         <zeebe:ioMapping>
-          <zeebe:input source="=200" target="tocId" />
+          <zeebe:input source="=&#34;200&#34;" target="tocId" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_10bwxsw</bpmn:incoming>
@@ -43,6 +43,9 @@
     <bpmn:serviceTask id="Activity_0tc2vzh" name="Define Product Footprint Template">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="define_product_footprint_template" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;Amazing Company 1&#34;" target="company_name" />
+        </zeebe:ioMapping>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1q60osb</bpmn:incoming>
       <bpmn:outgoing>Flow_1mj7o6x</bpmn:outgoing>
@@ -66,7 +69,7 @@
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="hub_procedure" />
         <zeebe:ioMapping>
-          <zeebe:input source="=100" target="hocID" />
+          <zeebe:input source="=&#34;100&#34;" target="hocId" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0m6ip6b</bpmn:incoming>
@@ -74,7 +77,10 @@
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Activity_1ns98zi" name="Fracht ausladen">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="hocId" retries="101" />
+        <zeebe:taskDefinition type="hub_procedure" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;101&#34;" target="hocId" />
+        </zeebe:ioMapping>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1ihzu3a</bpmn:incoming>
       <bpmn:outgoing>Flow_1w2w9k8</bpmn:outgoing>
