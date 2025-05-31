@@ -1,6 +1,7 @@
 import random
 import uuid
 import datetime
+import json
 from typing import Dict
 
 from pyzeebe import ZeebeWorker, ZeebeClient
@@ -68,21 +69,25 @@ class CamundaWorkerTasks:
         product_footprint_verified = ProductFootprint.model_validate(
             product_footprint)
 
+        # product_footprint_verified = ProductFootprint.model_validate_json(
+        #   product_footprint)
+
+        prev_tce_ids = []
         if product_footprint_verified.extensions[0].data.tces is not None:
             prev_tce_ids = product_footprint_verified.extensions[0].data.tces[-1].prevTceIds
             last_tceid = product_footprint_verified.extensions[0].data.tces[-1].tceId
 
-            tce_ids = prev_tce_ids.append(last_tceid)
+            prev_tce_ids.append(last_tceid)
 
         new_TCE = TCE(
-            tceId=uuid.uuid4(),
+            tceId=str(uuid.uuid4()),
             shipmentId=product_footprint_verified.extensions[0].data.shipmentId,
             mass=product_footprint_verified.extensions[0].data.mass,
             distance=Distance(
                 actual=distance_from_sensor
             ),
             toc=tocId,
-            prevTceIds=tce_ids if tce_ids else []
+            prevTceIds=prev_tce_ids
         )
 
         product_footprint_verified.extensions[0].data.tces.append(
@@ -90,12 +95,12 @@ class CamundaWorkerTasks:
         )
 
         result = {
-            "product_footprint": product_footprint_verified.model_dump_json()
+            "product_footprint": product_footprint_verified.model_dump()
         }
 
         return result
 
-    def hub_procedure(self, hocId: int, product_footprint: dict) -> dict:
+    def hub_procedure(self, hocId: str, product_footprint: dict) -> dict:
         """
         Handle the hub procedure for a given HOC ID and product footprint.
 
@@ -110,26 +115,27 @@ class CamundaWorkerTasks:
         product_footprint_verified = ProductFootprint.model_validate(
             product_footprint)
 
-        if product_footprint_verified.extensions[0].data.tces is not None:
+        prev_tce_ids = []
+        if len(product_footprint_verified.extensions[0].data.tces) > 0:
             prev_tce_ids = product_footprint_verified.extensions[0].data.tces[-1].prevTceIds
             last_tceid = product_footprint_verified.extensions[0].data.tces[-1].tceId
 
-            tce_ids = prev_tce_ids.append(last_tceid)
+            prev_tce_ids.append(last_tceid)
 
         new_TCE = TCE(
-            tceId=uuid.uuid4(),
+            tceId=str(uuid.uuid4()),
             shipmentId=product_footprint_verified.extensions[0].data.shipmentId,
             mass=product_footprint_verified.extensions[0].data.mass,
             hocId=hocId,
-            prevTceIds=tce_ids if tce_ids else []
+            prevTceIds=prev_tce_ids
         )
 
         product_footprint_verified.extensions[0].data.tces.append(
             new_TCE
         )
-
+        hallo = product_footprint_verified.model_dump()
         result = {
-            "product_footprint": product_footprint_verified.model_dump_json()
+            "product_footprint": product_footprint_verified.model_dump()
         }
 
         return result
@@ -145,16 +151,17 @@ class CamundaWorkerTasks:
 
         result = {
             "product_footprint": {
-                "id": uuid.uuid4(),
+                "id": str(uuid.uuid4()),
                 "specVersion": "2.0.0",
                 "version": 0,
-                "created": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "created": datetime.datetime.now().isoformat(),
                 "status": "Active",
                 "companyName": company_name,
                 "companyIds": [f"urn:epcidsgln: {uuid.uuid4()}"],
                 "productDescription": f"Logistics emissions related to shipment with ID {shipment_information.get('shipment_id', 'unknown')}",
                 "productIds": [f"urn:pathfinder:product:customcode:vendor-assigned: {uuid.uuid4()}"],
-                "productCategoryCpc": random.int(1000, 9999),
+                # Random CPC code
+                "productCategoryCpc": random.randint(1000, 9999),
                 "productNameCompany": f"Shipment with ID {shipment_information.get('shipment_id', 'unknown')}",
                 "pcf": None,
                 "comment": "",
@@ -322,7 +329,7 @@ class CamundaWorkerTasks:
         Returns:
             Dictionary containing the new shipment ID and weight
         """
-        log_task_start("set_shipment_id")
+        log_task_start("set_shipment_information")
 
         shipment_id = f"SHIP_{uuid.uuid4()}"
         weight = random.uniform(1000, 20000)

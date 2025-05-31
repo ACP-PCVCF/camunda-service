@@ -59,12 +59,12 @@ class Distance(BaseModel):
 
 
 class TCE(BaseModel):
-    tceId: int
+    tceId: str
     prevTceIds: List[str] = []
-    hocId: Optional[str]
-    tocId: Optional[str]
+    hocId: Optional[str] = None
+    tocId: Optional[str] = None
     shipmentId: str
-    mass: int
+    mass: float
     co2eWTW: Optional[float] = None
     co2eTTW: Optional[float] = None
     transportActivity: Optional[float] = None
@@ -84,7 +84,7 @@ class Extension(BaseModel):
 
 
 class ProductFootprint(BaseModel):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    id: str
     specVersion: str = "2.0.0"
     version: int = 0
     created: str
