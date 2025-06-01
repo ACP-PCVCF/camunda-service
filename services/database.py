@@ -19,7 +19,7 @@ class HocTocService:
             self.db.populate_from_mock_data(get_mock_data)
 
     def get_transport_data(self, id: str) -> Optional[Dict[str, Any]]:
-        """Get data from database (replaces get_mock_data)."""
+        """Get data from database by ID, checking HOC and TOC tables."""
 
         data = self.db.get_hoc_data(id)
         if data:
@@ -32,7 +32,7 @@ class HocTocService:
         return None
 
     def collect_hoc_toc_data(self, product_footprint: dict):
-        """Your existing method, updated to use database."""
+        """Collect HOC and TOC data based on product footprint and return a proofing document."""
         product_footprint_verified = ProductFootprint.model_validate(
             product_footprint)
         proofingDocument = ProofingDocument(

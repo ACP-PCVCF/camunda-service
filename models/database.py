@@ -1,11 +1,13 @@
 import sqlite3
 import json
+from config.database_config import DatabaseConfig
 from typing import Optional, Dict, Any
 
 
 class HocTocDatabase:
-    def __init__(self, db_path: str = "hoc_toc_data.db"):
-        self.db_path = db_path
+    def __init__(self):
+        self.db_path = DatabaseConfig.DB_PATH
+        self.timeout = DatabaseConfig.TIMEOUT
         self.init_database()
 
     def init_database(self):
