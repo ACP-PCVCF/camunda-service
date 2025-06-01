@@ -8,7 +8,7 @@ from utils.logging_utils import log_task_start, log_task_completion
 from utils.kafka import send_message_to_kafka, consume_messages_from_kafka
 
 from models.product_footprint import ProductFootprint, Extension, ExtensionData, TceData, Distance
-from models.proofing_document import ProofingDocument
+from models.proofing_document import ProofingDocument, ProofResponse
 
 
 class CamundaWorkerTasks:
@@ -229,18 +229,21 @@ class CamundaWorkerTasks:
 
     def send_to_proofing_service(self, proofing_document: dict) -> dict:
         # call proofing service by api
-        topic = "shipments"
+        topic_out = "shipments"
+        topic_in = "pcf-results"
 
         proofing_document_verified = ProofingDocument.model_validate(
             proofing_document)
 
         message_to_send = proofing_document_verified.model_dump_json()
-        send_message_to_kafka(topic, message_to_send)
-        consume_messages_from_kafka(topic)
+        send_message_to_kafka(topic_out, message_to_send)
+        msg = consume_messages_from_kafka(topic_in)
 
-        product_footprint_reference = "123"
+        proof_response = ProofResponse.model_validate_json(msg)
 
-        return {"product_footprint": product_footprint_reference}
+        # product_footprint_reference = "123"
+
+        return {"product_footprint": proof_response.proofReference}
 
     async def notify_next_node(self, message_name: str, shipment_information: dict) -> None:
         """
