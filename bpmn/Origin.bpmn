@@ -41,7 +41,7 @@
   </bpmn:process>
   <bpmn:message id="Message_2k6ap5m" name="TceComplete">
     <bpmn:extensionElements>
-      <zeebe:subscription correlationKey="=shipment_id" />
+      <zeebe:subscription correlationKey="=shipment_information.shipment_id" />
     </bpmn:extensionElements>
   </bpmn:message>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">

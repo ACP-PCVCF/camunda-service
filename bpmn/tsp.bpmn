@@ -5,16 +5,18 @@
     <bpmn:sequenceFlow id="Flow_0zvkgzy" sourceRef="Activity_01uu18q" targetRef="Activity_18wbejl" />
     <bpmn:callActivity id="Activity_18wbejl" name="Request Sub-TSPs">
       <bpmn:extensionElements>
-        <zeebe:calledElement processId="=subprocess_id" propagateAllChildVariables="false" />
+        <zeebe:calledElement processId="=subprocess_id" propagateAllChildVariables="false" propagateAllParentVariables="false" />
         <zeebe:ioMapping>
-          <zeebe:output source="=instance_scf" target="intstance_scf" />
+          <zeebe:input source="=product_footprints[count(product_footprints)]" target="previous_product_footprint" />
+          <zeebe:input source="=shipment_information" target="shipment_information" />
+          <zeebe:output source="=product_footprint" target="intstance_scf" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0zvkgzy</bpmn:incoming>
       <bpmn:outgoing>Flow_1t4dit4</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics isSequential="true">
         <bpmn:extensionElements>
-          <zeebe:loopCharacteristics inputCollection="=subprocess_identifiers" inputElement="subprocess_id" outputCollection="complete_tce_data" outputElement="=instance_scf" />
+          <zeebe:loopCharacteristics inputCollection="=subprocess_identifiers" inputElement="subprocess_id" outputCollection="product_footprints" outputElement="=product_footprint" />
         </bpmn:extensionElements>
       </bpmn:multiInstanceLoopCharacteristics>
     </bpmn:callActivity>
@@ -38,7 +40,7 @@
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="send_data_to_origin" />
         <zeebe:ioMapping>
-          <zeebe:input source="=complete_tce_data" target="tce_data" />
+          <zeebe:input source="=product_footprints" target="product_footprints" />
           <zeebe:input source="=&#34;TceComplete&#34;" target="message_name" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>

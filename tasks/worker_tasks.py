@@ -49,8 +49,10 @@ class CamundaWorkerTasks:
     def transport_procedure(self, tocId: int, product_footprint: dict) -> dict:
 
         log_task_start("transport_procedure")
+        new_tce_id = str(uuid.uuid4())
 
-        # call greta
+        # call greta with TceSensorData object, filled with new_tce_id, camunda Process Instance Key and camunda Activity Id
+        # receive instance of TceSensorData back
         distance_from_sensor = random.uniform(10, 1000)
 
         product_footprint_verified = ProductFootprint.model_validate(
@@ -199,8 +201,12 @@ class CamundaWorkerTasks:
     def call_service_sensordata_certificate(self):
         pass
 
-    def send_to_proofing_service(self):
-        pass
+    def send_to_proofing_service(self, proofing_document: dict) -> dict:
+        #call proofing service by api
+        product_footprint_reference = "123"
+
+
+        return {"product_footprint": product_footprint_reference}
 
     async def notify_next_node(self, message_name: str, shipment_information: dict) -> None:
         """
@@ -226,7 +232,7 @@ class CamundaWorkerTasks:
             self,
             shipment_information: dict,
             message_name: str,
-            tce_data: dict,
+            product_footprints: dict,
     ):
         """
         Send data back to the origin process.
@@ -244,7 +250,7 @@ class CamundaWorkerTasks:
             correlation_key=shipment_information.get("shipment_id", "unknown"),
             variables={
                 "shipment_id": shipment_information.get("shipment_id", "unknown"),
-                "tce_data": tce_data
+                "product_footprints": product_footprints
             }
         )
 

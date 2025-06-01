@@ -30,7 +30,6 @@ async def main():
     # Initialize worker tasks
     logger.info("Registering worker tasks")
     worker_tasks = CamundaWorkerTasks(worker, client)
-
     # Start the worker
     logger.info("Starting Zeebe worker")
     try:

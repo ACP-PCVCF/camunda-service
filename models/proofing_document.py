@@ -7,6 +7,8 @@ from models.sensor_data import SensorData
 
 class TceSensorData(BaseModel):
     tceId: str
+    camundaProcessInstanceKey: str | int
+    camundaActivityId: str
     sensorkey: str
     signedSensorData: str
     sensorData: SensorData
