@@ -1,13 +1,12 @@
 import random
 import uuid
 import datetime
-from typing import Dict
-from pyzeebe import ZeebeWorker, ZeebeClient
+from pyzeebe import ZeebeWorker, ZeebeClient, Job
 from services.database import HocTocService
 from utils.error_handling import on_error
 from utils.logging_utils import log_task_start, log_task_completion
 
-from models.product_footprint import ProductFootprint, Extension, ExtensionData, TCE, Distance
+from models.product_footprint import ProductFootprint, Extension, ExtensionData, TceData, Distance
 
 
 class CamundaWorkerTasks:
@@ -46,10 +45,15 @@ class CamundaWorkerTasks:
 
         return self.hoc_toc_service.collect_hoc_toc_data(product_footprint)
 
-    def transport_procedure(self, tocId: int, product_footprint: dict) -> dict:
+    def transport_procedure(self, tocId: int, product_footprint: dict, job: Job) -> dict:
 
         log_task_start("transport_procedure")
         new_tce_id = str(uuid.uuid4())
+
+        process_id = job.process_instance_key
+        print(f"Received job for process instance: {process_id}")
+        element_id = job.element_id
+        print(f"Element ID (from BPMN diagram): {element_id}")
 
         # call greta with TceSensorData object, filled with new_tce_id, camunda Process Instance Key and camunda Activity Id
         # receive instance of TceSensorData back
@@ -67,8 +71,8 @@ class CamundaWorkerTasks:
 
             prev_tce_ids.append(last_tceid)
 
-        new_TCE = TCE(
-            tceId=str(uuid.uuid4()),
+        new_TCE = TceData(
+            tceId=new_tce_id,
             shipmentId=product_footprint_verified.extensions[0].data.shipmentId,
             mass=product_footprint_verified.extensions[0].data.mass,
             distance=Distance(
@@ -115,15 +119,13 @@ class CamundaWorkerTasks:
 
             prev_tce_ids.append(last_tceid)
 
-        new_TCE = TCE(
+        new_TCE = TceData(
             tceId=str(uuid.uuid4()),
             shipmentId=product_footprint_verified.extensions[0].data.shipmentId,
             mass=product_footprint_verified.extensions[0].data.mass,
             hocId=hocId,
             prevTceIds=prev_tce_ids
         )
-        print("New TCE:")
-        print(new_TCE.prevTceIds)
         product_footprint_verified.extensions[0].data.tces.append(
             new_TCE
         )
@@ -202,9 +204,8 @@ class CamundaWorkerTasks:
         pass
 
     def send_to_proofing_service(self, proofing_document: dict) -> dict:
-        #call proofing service by api
+        # call proofing service by api
         product_footprint_reference = "123"
-
 
         return {"product_footprint": product_footprint_reference}
 

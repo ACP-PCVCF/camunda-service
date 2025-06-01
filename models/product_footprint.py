@@ -8,7 +8,7 @@ class Distance(BaseModel):
     sfd: Optional[float] = None
 
 
-class TCE(BaseModel):
+class TceData(BaseModel):
     tceId: str
     prevTceIds: List[str] = []
     hocId: Optional[str] = None
@@ -24,7 +24,7 @@ class TCE(BaseModel):
 class ExtensionData(BaseModel):
     mass: float
     shipmentId: str
-    tces: List[TCE] = Field(default_factory=list)
+    tces: List[TceData] = Field(default_factory=list)
 
 
 class Extension(BaseModel):
