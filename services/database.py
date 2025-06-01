@@ -3,6 +3,7 @@ from models.proofing_document import ProofingDocument
 from models.product_footprint import ProductFootprint
 from typing import Optional, Dict, Any
 from utils.data_utils import get_mock_data
+from models.hoc_toc_data import HocData, TocData
 
 
 class HocTocService:
@@ -43,13 +44,17 @@ class HocTocService:
 
         for ids in product_footprint_verified.extensions[0].data.tces:
             if ids.tocId is not None:
-                data = self.get_transport_data(ids.tocId)
-                if data:
-                    proofingDocument.tocData.append(data)
+                raw_data = self.get_transport_data(ids.tocId)
+                if raw_data:
+                    # Validate through Pydantic model first
+                    validated_toc_data = TocData.model_validate(raw_data)
+                    proofingDocument.tocData.append(validated_toc_data)
             if ids.hocId is not None:
-                data = self.get_transport_data(ids.hocId)
-                if data:
-                    proofingDocument.hocData.append(data)
+                raw_data = self.get_transport_data(ids.hocId)
+                if raw_data:
+                    # Validate through Pydantic model first
+                    validated_hoc_data = HocData.model_validate(raw_data)
+                    proofingDocument.hocData.append(validated_hoc_data)
 
         result = {
             "proofing_document": proofingDocument.model_dump()

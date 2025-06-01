@@ -51,14 +51,13 @@ def get_mock_data(id: str):
             "energyCarriers": [
                 {
                     "energyCarrier": "Electricity",
-                    # Dimensionless (fraction)
-                    "distributionEfficiency": "0.98",
-                    "energyDensity": "1 kWh/unit",    # As per documentation example for electricity
-                    "unit": "kWh"
+                    "relativeShare": "1.0",  # 100% electricity
+                    "emissionFactorWTW": "25 gCO2e/MJ",  # Grid mix electricity
+                    "emissionFactorTTW": "0 gCO2e/MJ"    # Zero at point of use for electric
                 }
             ],
-            "co2eIntensityWTW": "25 gCO2e/MJ",    # Example: Grid mix electricity
-            "co2eIntensityTTW": "0 gCO2e/MJ",     # For electric vehicles at point of use
+            "co2eIntensityWTW": "25 gCO2e/MJ",
+            "co2eIntensityTTW": "0 gCO2e/MJ",
             "hubActivityUnit": "kWh delivered"
         },
         "101": {
@@ -67,23 +66,21 @@ def get_mock_data(id: str):
             "energyCarriers": [
                 {
                     "energyCarrier": "Hydrogen",
-                    "distributionEfficiency": "0.90",
-                    "energyDensity": "33.3 kWh/kg",   # Approx. 120 MJ/kg
-                    "unit": "kg"
+                    "relativeShare": "0.8",  # 80% hydrogen
+                    # Steam Methane Reforming (SMR) H2
+                    "emissionFactorWTW": "70 gCO2e/MJ",
+                    "emissionFactorTTW": "0 gCO2e/MJ"    # Zero for FCEV
                 },
                 {
                     "energyCarrier": "Diesel",
-                    "distributionEfficiency": "0.99",
-                    "energyDensity": "10.7 kWh/L",   # Approx. 38.6 MJ/L
-                    "unit": "L"
+                    "relativeShare": "0.2",  # 20% diesel
+                    "emissionFactorWTW": "95 gCO2e/MJ",
+                    "emissionFactorTTW": "73 gCO2e/MJ"
                 }
             ],
-            # Assuming these intensities are primarily for Hydrogen at this hub
-            # Example: Steam Methane Reforming (SMR) H2
             "co2eIntensityWTW": "70 gCO2e/MJ",
-            # For Fuel Cell Electric Vehicles (FCEV)
             "co2eIntensityTTW": "0 gCO2e/MJ",
-            "hubActivityUnit": "kg dispensed"     # e.g., kg of Hydrogen
+            "hubActivityUnit": "kg dispensed"
         },
         "102": {
             "hocId": "102",
@@ -91,20 +88,19 @@ def get_mock_data(id: str):
             "energyCarriers": [
                 {
                     "energyCarrier": "Electricity",
-                    "distributionEfficiency": "0.97",
-                    "energyDensity": "1 kWh/unit",
-                    "unit": "kWh"
+                    "relativeShare": "0.3",  # 30% electricity
+                    "emissionFactorWTW": "25 gCO2e/MJ",
+                    "emissionFactorTTW": "0 gCO2e/MJ"
                 },
                 {
                     "energyCarrier": "Diesel",
-                    "distributionEfficiency": "0.99",
-                    "energyDensity": "10.7 kWh/L",
-                    "unit": "L"
+                    "relativeShare": "0.7",  # 70% diesel
+                    "emissionFactorWTW": "95 gCO2e/MJ",
+                    "emissionFactorTTW": "73 gCO2e/MJ"
                 }
             ],
-            # Assuming these intensities are predominantly related to Diesel for trucks
-            "co2eIntensityWTW": "95 gCO2e/MJ",    # WTW for fossil Diesel
-            "co2eIntensityTTW": "73 gCO2e/MJ",    # TTW for Diesel combustion
+            "co2eIntensityWTW": "95 gCO2e/MJ",
+            "co2eIntensityTTW": "73 gCO2e/MJ",
             "hubActivityUnit": "number of vehicles serviced"
         },
         "103": {
@@ -113,57 +109,55 @@ def get_mock_data(id: str):
             "energyCarriers": [
                 {
                     "energyCarrier": "Electricity",
-                    "distributionEfficiency": "0.96",
-                    "energyDensity": "1 kWh/unit",
-                    "unit": "kWh"
+                    "relativeShare": "0.4",  # 40% electricity
+                    "emissionFactorWTW": "25 gCO2e/MJ",
+                    "emissionFactorTTW": "0 gCO2e/MJ"
                 },
                 {
-                    "energyCarrier": "HVO100",  # Hydrotreated Vegetable Oil
-                    "distributionEfficiency": "0.98",
-                    "energyDensity": "9.2 kWh/L",  # Approx. energy density
-                    "unit": "L"
+                    "energyCarrier": "HVO100",
+                    "relativeShare": "0.35",  # 35% HVO100
+                    "emissionFactorWTW": "20 gCO2e/MJ",  # Lower carbon biofuel
+                    "emissionFactorTTW": "15 gCO2e/MJ"
                 },
                 {
-                    "energyCarrier": "CNG",     # Compressed Natural Gas
-                    "distributionEfficiency": "0.92",
-                    "energyDensity": "13.9 kWh/kg",  # Approx. 50 MJ/kg by mass
-                    "unit": "kg"               # Typically sold by mass
+                    "energyCarrier": "CNG",
+                    "relativeShare": "0.25",  # 25% CNG
+                    "emissionFactorWTW": "55 gCO2e/MJ",
+                    "emissionFactorTTW": "50 gCO2e/MJ"
                 }
             ],
-            # Example: blended/average values for a hub focusing on lower carbon options
             "co2eIntensityWTW": "30 gCO2e/MJ",
-            # Reflects some combustion but lower than pure fossil
             "co2eIntensityTTW": "20 gCO2e/MJ",
             "hubActivityUnit": "energy delivered (MJ)"
         },
         "200": {
             "tocId": "200",
-            "certifications": ["ISO_14001", "ECO_TRANSIT_CERT"],
+            "certifications": ["ISO14083:2023", "GLECv3"],
             "description": "Standard Diesel Truck - Long Haul",
-            "mode": "Road",  # Assuming TransportMode is a string, could be an Enum
-            "loadFactor": "0.80",  # Dimensionless (fraction)
-            "emptyDistanceFactor": "0.10",  # Dimensionless (fraction)
+            "mode": "road",
+            "loadFactor": "0.80",
+            "emptyDistanceFactor": "0.10",
             "temperatureControl": "Ambient",
-            "truckLoadingSequence": "LIFO",  # Last-In, First-Out
+            "truckLoadingSequence": "LIFO",
             "airShippingOption": None,
             "flightLength": None,
             "energyCarriers": [
                 {
                     "energyCarrier": "Diesel",
-                    "distributionEfficiency": "0.99",  # Assumed high for direct fueling
-                    "energyDensity": "10.7 kWh/L",   # Approx. 38.6 MJ/L
-                    "unit": "L"
+                    "relativeShare": "1.0",  # 100% diesel
+                    "emissionFactorWTW": "85 gCO2e/tkm",
+                    "emissionFactorTTW": "75 gCO2e/tkm"
                 }
             ],
-            "co2eIntensityWTW": "85 gCO2e/tkm",  # Well-to-Wheel, per tonne-kilometer
-            "co2eIntensityTTW": "75 gCO2e/tkm",  # Tank-to-Wheel, per tonne-kilometer
+            "co2eIntensityWTW": "85 gCO2e/tkm",
+            "co2eIntensityTTW": "75 gCO2e/tkm",
             "transportActivityUnit": "tkm"
         },
         "201": {
             "tocId": "201",
-            "certifications": ["GREEN_LOGISTICS_PARTNER"],
+            "certifications": ["GLECv3.1"],
             "description": "Electric Van - Urban Delivery",
-            "mode": "Road",
+            "mode": "road",
             "loadFactor": "0.65",
             "emptyDistanceFactor": "0.05",
             "temperatureControl": "None",
@@ -173,90 +167,88 @@ def get_mock_data(id: str):
             "energyCarriers": [
                 {
                     "energyCarrier": "Electricity",
-                    "distributionEfficiency": "0.95",  # Grid to vehicle charging efficiency
-                    "energyDensity": "1 kWh/unit",    # Standard for electricity
-                    "unit": "kWh"
+                    "relativeShare": "1.0",  # 100% electricity
+                    "emissionFactorWTW": "30 gCO2e/tkm",
+                    "emissionFactorTTW": "0 gCO2e/tkm"
                 }
             ],
-            # Lower due to electric, depends on grid mix
             "co2eIntensityWTW": "30 gCO2e/tkm",
-            "co2eIntensityTTW": "0 gCO2e/tkm",     # Zero at point of use for EV
-            "transportActivityUnit": "vkm"  # Vehicle-kilometer, common for urban delivery
+            "co2eIntensityTTW": "0 gCO2e/tkm",
+            "transportActivityUnit": "vkm"
         },
         "202": {
             "tocId": "202",
-            "certifications": ["IATA_CEIV_PHARMA"],
+            "certifications": ["ISO14083:2023", "GLECv2"],
             "description": "Air Freight - International Cargo",
-            "mode": "Air",
+            "mode": "air",
             "loadFactor": "0.70",
-            "emptyDistanceFactor": "0.02",  # Less applicable in same way as road
+            "emptyDistanceFactor": "0.02",
             "temperatureControl": "Refrigerated +2C to +8C",
-            "truckLoadingSequence": None,  # Not applicable
+            "truckLoadingSequence": "None",
             "airShippingOption": "Dedicated Cargo Aircraft",
             "flightLength": "Long Haul (>4000km)",
             "energyCarriers": [
                 {
                     "energyCarrier": "Jet Fuel (Kerosene)",
-                    "distributionEfficiency": "0.99",
-                    "energyDensity": "12.0 kWh/kg",  # Approx. 43.1 MJ/kg
-                    "unit": "kg"  # Often measured in kg or tonnes for aviation
+                    "relativeShare": "1.0",  # 100% jet fuel
+                    "emissionFactorWTW": "700 gCO2e/tkm",
+                    "emissionFactorTTW": "650 gCO2e/tkm"
                 }
             ],
-            "co2eIntensityWTW": "700 gCO2e/tkm",  # Significantly higher for air freight
+            "co2eIntensityWTW": "700 gCO2e/tkm",
             "co2eIntensityTTW": "650 gCO2e/tkm",
             "transportActivityUnit": "tkm"
         },
         "203": {
             "tocId": "203",
-            "certifications": ["RAIL_SUSTAINABILITY_CHARTER"],
+            "certifications": ["GLECv3", "ISO14083:2023"],
             "description": "Electric Rail Freight - National",
-            "mode": "Rail",
-            "loadFactor": "0.90",  # Typically high for rail
+            "mode": "rail",
+            "loadFactor": "0.90",
             "emptyDistanceFactor": "0.03",
             "temperatureControl": "Ambient",
-            "truckLoadingSequence": None,  # Not applicable
+            "truckLoadingSequence": "None",
             "airShippingOption": None,
             "flightLength": None,
             "energyCarriers": [
                 {
                     "energyCarrier": "Electricity",
-                    "distributionEfficiency": "0.92",  # From grid to locomotive
-                    "energyDensity": "1 kWh/unit",
-                    "unit": "kWh"
+                    "relativeShare": "1.0",  # 100% electricity
+                    "emissionFactorWTW": "15 gCO2e/tkm",
+                    "emissionFactorTTW": "0 gCO2e/tkm"
                 }
             ],
-            "co2eIntensityWTW": "15 gCO2e/tkm",  # Very low for electric rail
-            "co2eIntensityTTW": "0 gCO2e/tkm",  # If fully electric
+            "co2eIntensityWTW": "15 gCO2e/tkm",
+            "co2eIntensityTTW": "0 gCO2e/tkm",
             "transportActivityUnit": "tkm"
         },
         "204": {
             "tocId": "204",
-            "certifications": ["MARITIME_ECO_SHIP"],
+            "certifications": ["GLECv3.1"],
             "description": "Container Ship - Transoceanic",
-            "mode": "Sea",
+            "mode": "sea",
             "loadFactor": "0.85",
-            "emptyDistanceFactor": "0.08",  # For empty container repositioning
+            "emptyDistanceFactor": "0.08",
             "temperatureControl": "Controlled Atmosphere (Fruits)",
-            "truckLoadingSequence": None,  # Not applicable
+            "truckLoadingSequence": "None",
             "airShippingOption": None,
             "flightLength": None,
             "energyCarriers": [
                 {
                     "energyCarrier": "Heavy Fuel Oil (HFO)",
-                    "distributionEfficiency": "0.98",
-                    "energyDensity": "11.5 kWh/kg",  # Approx. 41.3 MJ/kg
-                    "unit": "tonne"  # Marine fuels often in tonnes
+                    "relativeShare": "0.8",  # 80% HFO
+                    "emissionFactorWTW": "12 gCO2e/tkm",
+                    "emissionFactorTTW": "11 gCO2e/tkm"
                 },
                 {
-                    "energyCarrier": "Marine Gas Oil (MGO)",  # For ECA zones
-                    "distributionEfficiency": "0.98",
-                    "energyDensity": "11.9 kWh/kg",  # Approx. 42.7 MJ/kg
-                    "unit": "tonne"
+                    "energyCarrier": "Marine Gas Oil (MGO)",
+                    "relativeShare": "0.2",  # 20% MGO for ECA zones
+                    "emissionFactorWTW": "8 gCO2e/tkm",
+                    "emissionFactorTTW": "7 gCO2e/tkm"
                 }
             ],
-            # Very low per tkm due to scale, but high absolute
             "co2eIntensityWTW": "10 gCO2e/tkm",
-            "co2eIntensityTTW": "9 gCO2e/tkm",  # HFO is carbon intensive
+            "co2eIntensityTTW": "9 gCO2e/tkm",
             "transportActivityUnit": "tkm"
         }
     }

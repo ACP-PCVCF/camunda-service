@@ -1,20 +1,18 @@
 {
   "productFootprint": {
-    "id": "2a8c6be6-996e-4029-a45f-0386e04d59a1",
+    "id": "a8cbe65e-a86c-443d-b836-24699f18e0f4",
     "specVersion": "2.0.0",
     "version": 0,
-    "created": "2025-06-01T03:48:25.978479",
+    "created": "2025-06-01T14:56:32.521929",
     "status": "Active",
     "companyName": "Amazing Company 3",
-    "companyIds": [
-      "urn:epcidsgln:e53d3e13-a7d3-44a3-bf11-599b39261183"
-    ],
-    "productDescription": "Logistics emissions related to shipment with ID SHIP_b0bdbe6e-1c75-4719-a9ea-1069a229ef0b",
+    "companyIds": ["urn:epcidsgln:0ccccef0-8243-46b9-877a-0f895c3232de"],
+    "productDescription": "Logistics emissions related to shipment with ID SHIP_b75778d7-f4be-4add-b904-9c831030b497",
     "productIds": [
-      "urn:pathfinder:product:customcode:vendor-assigned:fe4a6a7b-437a-469e-b3cb-f31ed030f280"
+      "urn:pathfinder:product:customcode:vendor-assigned:6a2420ea-68aa-4cd7-8508-af68ccd32ca4"
     ],
-    "productCategoryCpc": 4535,
-    "productNameCompany": "Shipment with ID SHIP_b0bdbe6e-1c75-4719-a9ea-1069a229ef0b",
+    "productCategoryCpc": 1123,
+    "productNameCompany": "Shipment with ID SHIP_b75778d7-f4be-4add-b904-9c831030b497",
     "pcf": null,
     "comment": "",
     "extensions": [
@@ -22,49 +20,47 @@
         "specVersion": "2.0.0",
         "dataSchema": "https://api.ileap.sine.dev/shipment-footprint.json",
         "data": {
-          "mass": 8114.693787596238,
-          "shipmentId": "SHIP_b0bdbe6e-1c75-4719-a9ea-1069a229ef0b",
+          "mass": 10918.72424487148,
+          "shipmentId": "SHIP_b75778d7-f4be-4add-b904-9c831030b497",
           "tces": [
             {
-              "tceId": "f20eaf97-af6d-48fc-8b4d-67f0a82338f8",
+              "tceId": "7df95f60-2e40-4ba4-8882-d35d732aa53c",
               "prevTceIds": [],
               "hocId": "102",
               "tocId": null,
-              "shipmentId": "SHIP_b0bdbe6e-1c75-4719-a9ea-1069a229ef0b",
-              "mass": 8114.693787596238,
+              "shipmentId": "SHIP_b75778d7-f4be-4add-b904-9c831030b497",
+              "mass": 10918.72424487148,
               "co2eWTW": null,
               "co2eTTW": null,
               "transportActivity": null,
               "distance": null
             },
             {
-              "tceId": "82e081f0-d1ba-4a7b-8c5c-bc44463d4b55",
-              "prevTceIds": [
-                "f20eaf97-af6d-48fc-8b4d-67f0a82338f8"
-              ],
+              "tceId": "9e367df4-d417-446c-892b-0caecb8302b3",
+              "prevTceIds": ["7df95f60-2e40-4ba4-8882-d35d732aa53c"],
               "hocId": null,
               "tocId": "203",
-              "shipmentId": "SHIP_b0bdbe6e-1c75-4719-a9ea-1069a229ef0b",
-              "mass": 8114.693787596238,
+              "shipmentId": "SHIP_b75778d7-f4be-4add-b904-9c831030b497",
+              "mass": 10918.72424487148,
               "co2eWTW": null,
               "co2eTTW": null,
               "transportActivity": null,
               "distance": {
-                "actual": 998.7828273312562,
+                "actual": 867.4768707474489,
                 "gcd": null,
                 "sfd": null
               }
             },
             {
-              "tceId": "9ea7e4c9-313b-462f-9f6d-985ecbe652e3",
+              "tceId": "78691578-09d4-412f-b7f6-97142af2521f",
               "prevTceIds": [
-                "f20eaf97-af6d-48fc-8b4d-67f0a82338f8",
-                "82e081f0-d1ba-4a7b-8c5c-bc44463d4b55"
+                "7df95f60-2e40-4ba4-8882-d35d732aa53c",
+                "9e367df4-d417-446c-892b-0caecb8302b3"
               ],
               "hocId": "102",
               "tocId": null,
-              "shipmentId": "SHIP_b0bdbe6e-1c75-4719-a9ea-1069a229ef0b",
-              "mass": 8114.693787596238,
+              "shipmentId": "SHIP_b75778d7-f4be-4add-b904-9c831030b497",
+              "mass": 10918.72424487148,
               "co2eWTW": null,
               "co2eTTW": null,
               "transportActivity": null,
@@ -78,23 +74,21 @@
   "tocData": [
     {
       "tocId": "203",
-      "certifications": [
-        "RAIL_SUSTAINABILITY_CHARTER"
-      ],
+      "certifications": ["GLECv3", "ISO14083:2023"],
       "description": "Electric Rail Freight - National",
-      "mode": "Rail",
+      "mode": "rail",
       "loadFactor": "0.90",
       "emptyDistanceFactor": "0.03",
       "temperatureControl": "Ambient",
-      "truckLoadingSequence": null,
+      "truckLoadingSequence": "None",
       "airShippingOption": null,
       "flightLength": null,
       "energyCarriers": [
         {
           "energyCarrier": "Electricity",
-          "distributionEfficiency": "0.92",
-          "energyDensity": "1 kWh/unit",
-          "unit": "kWh"
+          "relativeShare": "1.0",
+          "emissionFactorWTW": "15 gCO2e/tkm",
+          "emissionFactorTTW": "0 gCO2e/tkm"
         }
       ],
       "co2eIntensityWTW": "15 gCO2e/tkm",
@@ -109,15 +103,15 @@
       "energyCarriers": [
         {
           "energyCarrier": "Electricity",
-          "distributionEfficiency": "0.97",
-          "energyDensity": "1 kWh/unit",
-          "unit": "kWh"
+          "relativeShare": "0.3",
+          "emissionFactorWTW": "25 gCO2e/MJ",
+          "emissionFactorTTW": "0 gCO2e/MJ"
         },
         {
           "energyCarrier": "Diesel",
-          "distributionEfficiency": "0.99",
-          "energyDensity": "10.7 kWh/L",
-          "unit": "L"
+          "relativeShare": "0.7",
+          "emissionFactorWTW": "95 gCO2e/MJ",
+          "emissionFactorTTW": "73 gCO2e/MJ"
         }
       ],
       "co2eIntensityWTW": "95 gCO2e/MJ",
@@ -130,15 +124,15 @@
       "energyCarriers": [
         {
           "energyCarrier": "Electricity",
-          "distributionEfficiency": "0.97",
-          "energyDensity": "1 kWh/unit",
-          "unit": "kWh"
+          "relativeShare": "0.3",
+          "emissionFactorWTW": "25 gCO2e/MJ",
+          "emissionFactorTTW": "0 gCO2e/MJ"
         },
         {
           "energyCarrier": "Diesel",
-          "distributionEfficiency": "0.99",
-          "energyDensity": "10.7 kWh/L",
-          "unit": "L"
+          "relativeShare": "0.7",
+          "emissionFactorWTW": "95 gCO2e/MJ",
+          "emissionFactorTTW": "73 gCO2e/MJ"
         }
       ],
       "co2eIntensityWTW": "95 gCO2e/MJ",
