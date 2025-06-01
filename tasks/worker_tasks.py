@@ -3,12 +3,11 @@ import uuid
 import datetime
 from typing import Dict
 from pyzeebe import ZeebeWorker, ZeebeClient
-from services.service_implementations.service_proofing import ProofingService
-from services.service_implementations.service_sensordata import SensorDataService
+from services.database import HocTocService
 from utils.error_handling import on_error
 from utils.logging_utils import log_task_start, log_task_completion
-from utils.data_utils import get_mock_data
-from models.data_models import ProductFootprint, TCE, Distance, Extension, ExtensionData, ProofingDocument
+
+from models.product_footprint import ProductFootprint, Extension, ExtensionData, TCE, Distance
 
 
 class CamundaWorkerTasks:
@@ -17,8 +16,7 @@ class CamundaWorkerTasks:
     def __init__(self, worker: ZeebeWorker, client: ZeebeClient):
         self.worker = worker
         self.client = client
-        self.sensor_data_service = SensorDataService()
-        self.proofing_service = ProofingService()
+        self.hoc_toc_service = HocTocService()
 
         # Register all tasks
         self._register_tasks()
@@ -27,8 +25,6 @@ class CamundaWorkerTasks:
         """Register all task handlers with the Zeebe worker."""
         self.worker.task(task_type="determine_job_sequence",
                          exception_handler=on_error)(self.determine_job_sequence)
-        self.worker.task(task_type="call_service_sensordata",
-                         exception_handler=on_error)(self.call_service_sensordata)
         self.worker.task(task_type="send_to_proofing_service",
                          exception_handler=on_error)(self.send_to_proofing_service)
         self.worker.task(task_type="notify_next_node",
@@ -48,27 +44,11 @@ class CamundaWorkerTasks:
 
     def collect_hoc_toc_data(self, product_footprint: dict):
 
-        product_footprint_verified = ProductFootprint.model_validate(
-            product_footprint)
-
-        proofingDocument = ProofingDocument(
-            productFootprint=product_footprint_verified, tocData=[], hocData=[])
-        for ids in product_footprint_verified.extensions[0].data.tces:
-            if ids.tocId is not None:
-                proofingDocument.tocData.append(get_mock_data(ids.tocId))
-            if ids.hocId is not None:
-                proofingDocument.hocData.append(get_mock_data(ids.hocId))
-
-        result = {
-            "proofing_document": proofingDocument.model_dump()
-        }
-
-        return result
+        return self.hoc_toc_service.collect_hoc_toc_data(product_footprint)
 
     def transport_procedure(self, tocId: int, product_footprint: dict) -> dict:
 
-        log_task_start("transport_procedure", tocId=tocId,
-                       product_footprint=product_footprint)
+        log_task_start("transport_procedure")
 
         # call greta
         distance_from_sensor = random.uniform(10, 1000)
@@ -104,7 +84,7 @@ class CamundaWorkerTasks:
             "product_footprint": product_footprint_verified.model_dump()
         }
 
-        log_task_completion("transport_procedure", **result)
+        log_task_completion("transport_procedure")
 
         return result
 
@@ -120,8 +100,7 @@ class CamundaWorkerTasks:
             product_footprint with HocId Information
         """
 
-        log_task_start("hub_procedure", hocId=hocId,
-                       product_footprint=product_footprint)
+        log_task_start("hub_procedure")
 
         product_footprint_verified = ProductFootprint.model_validate(
             product_footprint)
@@ -150,7 +129,7 @@ class CamundaWorkerTasks:
             "product_footprint": product_footprint_verified.model_dump()
         }
 
-        log_task_completion("hub_procedure", **result)
+        log_task_completion("hub_procedure")
 
         return result
 
@@ -192,7 +171,7 @@ class CamundaWorkerTasks:
             "product_footprint": product_footprint.model_dump()
         }
 
-        log_task_completion("define_product_footprint_template", **result)
+        log_task_completion("define_product_footprint_template")
         return result
 
     def determine_job_sequence(self):
@@ -214,79 +193,16 @@ class CamundaWorkerTasks:
         log_task_completion("determine_job_sequence", **result)
         return result
 
-    def call_service_sensordata(
-            self,
-            shipment_id: str,
-            # Random sensor ID for demonstration
-            sensor_id: int = random.randint(1, 1000)
-    ) -> Dict:
-        """
-        Generate transport carbon emission (TCE) data for a shipment.
-
-        Args:
-            shipment_id: Unique identifier for the shipment
-            sensor_id: Unique identifier for the sensor
-
-        Returns:
-            Dictionary containing the TCE data
-        """
-        # log_task_start("call_service_sensordata", shipment_id=shipment_id, sensor_id=sensor_id)
-        # Instead of the inline implementation, call the service
-        # In the future, this would call the real sensor data service
-        result = self.sensor_data_service.get_mock_sensor_data(
-            shipment_id=shipment_id,
-            mass_kg=None or random.uniform(1000, 20000),
-            distance_km=None or random.uniform(10, 1000),
-            prev_tce_id=None,
-            start_time=None
-        )
-
-        # log_task_completion("call_service_sensordata", **result)
-
-        return result
+    def call_service_sensordata(self):
+        pass
 
     def call_service_sensordata_certificate(self):
-        """
-        Generate a certificate for the transport carbon emission (TCE) data.
+        pass
 
-        Returns:
-            Dictionary containing the certificate data
-        """
-        log_task_start("call_service_sensordata_certificate")
+    def send_to_proofing_service(self):
+        pass
 
-        # In the future, this would call the real sensor data service
-        result = {
-            "certificate": "Certificate data here"
-        }
-
-        log_task_completion("call_service_sensordata_certificate", **result)
-        return result
-
-    def send_to_proofing_service(self, **variables) -> dict[str, str | dict]:
-        """
-        Send data to a proofing service.
-
-        Args:
-            variables: Process variables containing TCE data
-
-        Returns:
-            Dictionary containing proof and PCF information
-        """
-        log_task_start("send_to_proofing_service")
-
-        # Extract TCE data from variables
-        shipment_data = {
-            key: value for key, value in variables.items()
-            if key.startswith("TCE_")
-        }
-
-        # Call the proofing service
-        result = self.proofing_service.send_to_proofing(shipment_data)
-
-        log_task_completion("send_to_proofing_service", **result)
-        return result
-
-    async def notify_next_node(self, message_name: str, shipment_information: dict = None) -> None:
+    async def notify_next_node(self, message_name: str, shipment_information: dict) -> None:
         """
         Publish a message to notify the next node in the process.
 
@@ -308,7 +224,7 @@ class CamundaWorkerTasks:
 
     async def send_data_to_origin(
             self,
-            shipment_id: str,
+            shipment_information: dict,
             message_name: str,
             tce_data: dict,
     ):
@@ -321,13 +237,13 @@ class CamundaWorkerTasks:
             tce_data: TCE data to include in the message
         """
         log_task_start("send_data_to_origin",
-                       shipment_id=shipment_id, message_name=message_name)
+                       shipment_information=shipment_information, message_name=message_name)
 
         await self.client.publish_message(
             name=message_name,
-            correlation_key=shipment_id,
+            correlation_key=shipment_information.get("shipment_id", "unknown"),
             variables={
-                "shipment_id": shipment_id,
+                "shipment_id": shipment_information.get("shipment_id", "unknown"),
                 "tce_data": tce_data
             }
         )
