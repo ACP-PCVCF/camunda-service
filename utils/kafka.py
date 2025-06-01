@@ -1,0 +1,63 @@
+from confluent_kafka import Producer
+from confluent_kafka import Consumer, KafkaException, KafkaError
+import sys
+
+
+def delivery_report(err, msg):
+    """ Called once for each message produced to indicate delivery result.
+        Triggered by poll() or flush(). """
+    if err is not None:
+        print(f"Message delivery failed: {err}")
+    else:
+        print(f"Message delivered to {msg.topic()} [{msg.partition()}]")
+
+
+def send_message_to_kafka(topic_name, message, bootstrap_servers='localhost:9092'):
+    conf = {'bootstrap.servers': bootstrap_servers}
+    producer = Producer(conf)
+
+    try:
+        producer.produce(topic_name, key="my_key", value=message.encode(
+            'utf-8'), callback=delivery_report)
+        producer.flush()  # Wait for all messages in the producer queue to be delivered
+    except Exception as e:
+        print(f"Error producing message: {e}")
+
+
+def consume_messages_from_kafka(topic_name, bootstrap_servers='localhost:9092', group_id='my_python_consumer_group'):
+    conf = {
+        'bootstrap.servers': bootstrap_servers,
+        'group.id': group_id,
+        # Start reading from the beginning if no offset is stored
+        'auto.offset.reset': 'earliest'
+    }
+
+    consumer = Consumer(conf)
+
+    try:
+        consumer.subscribe([topic_name])
+
+        while True:
+            # Poll for messages, with a 1-second timeout
+            msg = consumer.poll(timeout=1.0)
+            if msg is None:
+                continue
+            if msg.error():
+                if msg.error().code() == KafkaError._PARTITION_EOF:
+                    # End of partition event - not an error
+                    sys.stderr.write(
+                        f'%% {msg.topic()} [{msg.partition()}] reached end offset {msg.offset()}\n')
+                elif msg.error():
+                    raise KafkaException(msg.error())
+            else:
+                # Message successfully received
+                print(
+                    f"Received message from Kafka: Topic={msg.topic()}, Partition={msg.partition()}, Offset={msg.offset()}")
+                print(
+                    f"Key: {msg.key().decode('utf-8') if msg.key() else 'N/A'}")
+                print(f"Value: {msg.value().decode('utf-8')}")
+
+    except KeyboardInterrupt:
+        sys.stderr.write('%% Aborted by user\n')
+    finally:
+        consumer.close()
