@@ -42,10 +42,32 @@ class CamundaWorkerTasks:
                          exception_handler=on_error)(self.collect_hoc_toc_data)
 
     def collect_hoc_toc_data(self, product_footprint: dict):
+        """
+        Collect HOC and TOC data based on product footprint.
+        Args:
+            product_footprint: Product footprint data
+        Returns:
+            Dictionary containing the proofing document with HOC and TOC data
+        """
 
-        return self.hoc_toc_service.collect_hoc_toc_data(product_footprint)
+        log_task_start("collect_hoc_toc_data")
+        result = self.hoc_toc_service.collect_hoc_toc_data(product_footprint)
+        log_task_completion("collect_hoc_toc_data")
+
+        return result
 
     def transport_procedure(self, tocId: int, product_footprint: dict, job: Job) -> dict:
+        """
+        Handle the hub procedure for a given tocId and product footprint.
+
+        Args:
+            tocId: Unique identifier for the transport operation category (toc)
+            job: Zeebe Job instance containing process instance and element ID
+            product_footprint: Product footprint data
+
+        Returns:
+            product_footprint with tocId Information
+        """
 
         log_task_start("transport_procedure")
         new_tce_id = str(uuid.uuid4())
@@ -96,14 +118,14 @@ class CamundaWorkerTasks:
 
     def hub_procedure(self, hocId: str, product_footprint: dict) -> dict:
         """
-        Handle the hub procedure for a given HOC ID and product footprint.
+        Handle the hub procedure for a given hocId and product footprint.
 
         Args:
-            hocId: Unique identifier for the hub operation category (HOC)
+            hocId: Unique identifier for the hub operation category (hoc)
             product_footprint: Product footprint data
 
         Returns:
-            product_footprint with HocId Information
+            product_footprint with hocId Information
         """
 
         log_task_start("hub_procedure")
@@ -139,10 +161,10 @@ class CamundaWorkerTasks:
 
     def define_product_footprint_template(self, company_name: str, shipment_information: dict) -> dict:
         """
-        Define a product footprint template.
+        Define a product footprint.
 
         Returns:
-            Dictionary containing the product footprint template
+            Dictionary containing the product footprint
         """
         log_task_start("define_product_footprint_template")
 
@@ -215,7 +237,7 @@ class CamundaWorkerTasks:
 
         Args:
             message_name: Name of the message to publish
-            shipment_id: Unique identifier for the shipment
+            shipment_information: Information about shipment and weight
         """
         log_task_start("notify_next_node",
                        message_name=message_name, shipment_information=shipment_information)
@@ -239,9 +261,9 @@ class CamundaWorkerTasks:
         Send data back to the origin process.
 
         Args:
-            shipment_id: Unique identifier for the shipment
+            shipment_information: Information about shipment and weight
             message_name: Name of the message to publish
-            tce_data: TCE data to include in the message
+            tce_data: Tce data to include in the message
         """
         log_task_start("send_data_to_origin",
                        shipment_information=shipment_information, message_name=message_name)
