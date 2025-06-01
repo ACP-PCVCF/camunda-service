@@ -24,12 +24,13 @@ def send_message_to_kafka(topic_name, message, bootstrap_servers='localhost:9092
         print(f"Error producing message: {e}")
 
 
-def consume_messages_from_kafka(topic_name, bootstrap_servers='localhost:9092', group_id='my_python_consumer_group'):
+def consume_messages_from_kafka(topic_name, bootstrap_servers='localhost:9092', group_id='my_python_consumer_group') -> str:
     conf = {
         'bootstrap.servers': bootstrap_servers,
         'group.id': group_id,
-        # Start reading from the beginning if no offset is stored
-        'auto.offset.reset': 'earliest'
+        'auto.offset.reset': 'earliest',
+        'enable.auto.commit': True,
+        'auto.commit.interval.ms': 5000
     }
 
     consumer = Consumer(conf)
@@ -55,7 +56,7 @@ def consume_messages_from_kafka(topic_name, bootstrap_servers='localhost:9092', 
                     f"Received message from Kafka: Topic={msg.topic()}, Partition={msg.partition()}, Offset={msg.offset()}")
                 print(
                     f"Key: {msg.key().decode('utf-8') if msg.key() else 'N/A'}")
-                print(f"Value: {msg.value().decode('utf-8')}")
+                return msg.value().decode('utf-8')
 
     except KeyboardInterrupt:
         sys.stderr.write('%% Aborted by user\n')

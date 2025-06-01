@@ -10,3 +10,10 @@ class ProofingDocument(BaseModel):
     tocData: list[TocData]
     hocData: list[HocData]
     signedSensorData: Optional[list[TceSensorData]] = None
+
+class ProofResponse(BaseModel):
+    productFootprintId: str
+    proofReceipt: str
+    proofReference: str
+    pcf: float
+    imageId: str
