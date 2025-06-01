@@ -2,16 +2,7 @@ from typing import Optional
 from pydantic import BaseModel
 from models.product_footprint import ProductFootprint
 from models.hoc_toc_data import TocData, HocData
-from models.sensor_data import SensorData
-
-
-class TceSensorData(BaseModel):
-    tceId: str
-    camundaProcessInstanceKey: str | int
-    camundaActivityId: str
-    sensorkey: str
-    signedSensorData: str
-    sensorData: SensorData
+from models.sensor_data import TceSensorData
 
 
 class ProofingDocument(BaseModel):
