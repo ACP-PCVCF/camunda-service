@@ -37,7 +37,6 @@ def consume_messages_from_kafka(topic_name, bootstrap_servers='localhost:9092', 
 
     try:
         consumer.subscribe([topic_name])
-
         while True:
             # Poll for messages, with a 1-second timeout
             msg = consumer.poll(timeout=1.0)
@@ -56,6 +55,7 @@ def consume_messages_from_kafka(topic_name, bootstrap_servers='localhost:9092', 
                     f"Received message from Kafka: Topic={msg.topic()}, Partition={msg.partition()}, Offset={msg.offset()}")
                 print(
                     f"Key: {msg.key().decode('utf-8') if msg.key() else 'N/A'}")
+                consumer.commit(asynchronous=False)
                 return msg.value().decode('utf-8')
 
     except KeyboardInterrupt:
