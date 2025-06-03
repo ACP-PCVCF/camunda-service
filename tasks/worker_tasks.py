@@ -94,7 +94,6 @@ class CamundaWorkerTasks:
             "camundaActivityId": element_id
         })
         if sensor_data is not None:
-            print(f"NO SENSOR DATA PROVIDED")
             sensor_data.append(new_sensor_data.model_dump())
         else:
             sensor_data = [new_sensor_data.model_dump()]
@@ -130,8 +129,6 @@ class CamundaWorkerTasks:
             "product_footprint": product_footprint_verified.model_dump(),
             "sensor_data": sensor_data
         }
-        print(sensor_data[-1])
-
         log_task_completion("transport_procedure")
 
         return result
