@@ -52,12 +52,12 @@ def get_mock_data(id: str):
                 {
                     "energyCarrier": "Electricity",
                     "relativeShare": "1.0",  # 100% electricity
-                    "emissionFactorWTW": "25 gCO2e/MJ",  # Grid mix electricity
-                    "emissionFactorTTW": "0 gCO2e/MJ"    # Zero at point of use for electric
+                    "emissionFactorWTW": "25",  # Grid mix electricity
+                    "emissionFactorTTW": "0"    # Zero at point of use for electric
                 }
             ],
-            "co2eIntensityWTW": "25 gCO2e/MJ",
-            "co2eIntensityTTW": "0 gCO2e/MJ",
+            "co2eIntensityWTW": "25",
+            "co2eIntensityTTW": "0",
             "hubActivityUnit": "kWh delivered"
         },
         "101": {
@@ -68,18 +68,18 @@ def get_mock_data(id: str):
                     "energyCarrier": "Hydrogen",
                     "relativeShare": "0.8",  # 80% hydrogen
                     # Steam Methane Reforming (SMR) H2
-                    "emissionFactorWTW": "70 gCO2e/MJ",
-                    "emissionFactorTTW": "0 gCO2e/MJ"    # Zero for FCEV
+                    "emissionFactorWTW": "70",
+                    "emissionFactorTTW": "0"    # Zero for FCEV
                 },
                 {
                     "energyCarrier": "Diesel",
                     "relativeShare": "0.2",  # 20% diesel
-                    "emissionFactorWTW": "95 gCO2e/MJ",
-                    "emissionFactorTTW": "73 gCO2e/MJ"
+                    "emissionFactorWTW": "95",
+                    "emissionFactorTTW": "73"
                 }
             ],
-            "co2eIntensityWTW": "70 gCO2e/MJ",
-            "co2eIntensityTTW": "0 gCO2e/MJ",
+            "co2eIntensityWTW": "70",
+            "co2eIntensityTTW": "0",
             "hubActivityUnit": "kg dispensed"
         },
         "102": {
@@ -89,18 +89,18 @@ def get_mock_data(id: str):
                 {
                     "energyCarrier": "Electricity",
                     "relativeShare": "0.3",  # 30% electricity
-                    "emissionFactorWTW": "25 gCO2e/MJ",
-                    "emissionFactorTTW": "0 gCO2e/MJ"
+                    "emissionFactorWTW": "25",
+                    "emissionFactorTTW": "0"
                 },
                 {
                     "energyCarrier": "Diesel",
                     "relativeShare": "0.7",  # 70% diesel
-                    "emissionFactorWTW": "95 gCO2e/MJ",
-                    "emissionFactorTTW": "73 gCO2e/MJ"
+                    "emissionFactorWTW": "95",
+                    "emissionFactorTTW": "73"
                 }
             ],
-            "co2eIntensityWTW": "95 gCO2e/MJ",
-            "co2eIntensityTTW": "73 gCO2e/MJ",
+            "co2eIntensityWTW": "95",
+            "co2eIntensityTTW": "73",
             "hubActivityUnit": "number of vehicles serviced"
         },
         "103": {
@@ -110,24 +110,24 @@ def get_mock_data(id: str):
                 {
                     "energyCarrier": "Electricity",
                     "relativeShare": "0.4",  # 40% electricity
-                    "emissionFactorWTW": "25 gCO2e/MJ",
-                    "emissionFactorTTW": "0 gCO2e/MJ"
+                    "emissionFactorWTW": "25",
+                    "emissionFactorTTW": "0"
                 },
                 {
                     "energyCarrier": "HVO100",
                     "relativeShare": "0.35",  # 35% HVO100
-                    "emissionFactorWTW": "20 gCO2e/MJ",  # Lower carbon biofuel
-                    "emissionFactorTTW": "15 gCO2e/MJ"
+                    "emissionFactorWTW": "20",  # Lower carbon biofuel
+                    "emissionFactorTTW": "15"
                 },
                 {
                     "energyCarrier": "CNG",
                     "relativeShare": "0.25",  # 25% CNG
-                    "emissionFactorWTW": "55 gCO2e/MJ",
-                    "emissionFactorTTW": "50 gCO2e/MJ"
+                    "emissionFactorWTW": "55",
+                    "emissionFactorTTW": "50"
                 }
             ],
-            "co2eIntensityWTW": "30 gCO2e/MJ",
-            "co2eIntensityTTW": "20 gCO2e/MJ",
+            "co2eIntensityWTW": "30",
+            "co2eIntensityTTW": "20",
             "hubActivityUnit": "energy delivered (MJ)"
         },
         "200": {
@@ -145,12 +145,12 @@ def get_mock_data(id: str):
                 {
                     "energyCarrier": "Diesel",
                     "relativeShare": "1.0",  # 100% diesel
-                    "emissionFactorWTW": "85 gCO2e/tkm",
-                    "emissionFactorTTW": "75 gCO2e/tkm"
+                    "emissionFactorWTW": "85",
+                    "emissionFactorTTW": "75"
                 }
             ],
-            "co2eIntensityWTW": "85 gCO2e/tkm",
-            "co2eIntensityTTW": "75 gCO2e/tkm",
+            "co2eIntensityWTW": "85",
+            "co2eIntensityTTW": "75",
             "transportActivityUnit": "tkm"
         },
         "201": {
@@ -168,12 +168,12 @@ def get_mock_data(id: str):
                 {
                     "energyCarrier": "Electricity",
                     "relativeShare": "1.0",  # 100% electricity
-                    "emissionFactorWTW": "30 gCO2e/tkm",
-                    "emissionFactorTTW": "0 gCO2e/tkm"
+                    "emissionFactorWTW": "30",
+                    "emissionFactorTTW": "0"
                 }
             ],
-            "co2eIntensityWTW": "30 gCO2e/tkm",
-            "co2eIntensityTTW": "0 gCO2e/tkm",
+            "co2eIntensityWTW": "30",
+            "co2eIntensityTTW": "0",
             "transportActivityUnit": "vkm"
         },
         "202": {
@@ -191,12 +191,12 @@ def get_mock_data(id: str):
                 {
                     "energyCarrier": "Jet Fuel (Kerosene)",
                     "relativeShare": "1.0",  # 100% jet fuel
-                    "emissionFactorWTW": "700 gCO2e/tkm",
-                    "emissionFactorTTW": "650 gCO2e/tkm"
+                    "emissionFactorWTW": "700",
+                    "emissionFactorTTW": "650"
                 }
             ],
-            "co2eIntensityWTW": "700 gCO2e/tkm",
-            "co2eIntensityTTW": "650 gCO2e/tkm",
+            "co2eIntensityWTW": "700",
+            "co2eIntensityTTW": "650",
             "transportActivityUnit": "tkm"
         },
         "203": {
@@ -214,12 +214,12 @@ def get_mock_data(id: str):
                 {
                     "energyCarrier": "Electricity",
                     "relativeShare": "1.0",  # 100% electricity
-                    "emissionFactorWTW": "15 gCO2e/tkm",
-                    "emissionFactorTTW": "0 gCO2e/tkm"
+                    "emissionFactorWTW": "15",
+                    "emissionFactorTTW": "0"
                 }
             ],
-            "co2eIntensityWTW": "15 gCO2e/tkm",
-            "co2eIntensityTTW": "0 gCO2e/tkm",
+            "co2eIntensityWTW": "15",
+            "co2eIntensityTTW": "0",
             "transportActivityUnit": "tkm"
         },
         "204": {
@@ -237,18 +237,18 @@ def get_mock_data(id: str):
                 {
                     "energyCarrier": "Heavy Fuel Oil (HFO)",
                     "relativeShare": "0.8",  # 80% HFO
-                    "emissionFactorWTW": "12 gCO2e/tkm",
-                    "emissionFactorTTW": "11 gCO2e/tkm"
+                    "emissionFactorWTW": "12",
+                    "emissionFactorTTW": "11"
                 },
                 {
                     "energyCarrier": "Marine Gas Oil (MGO)",
                     "relativeShare": "0.2",  # 20% MGO for ECA zones
-                    "emissionFactorWTW": "8 gCO2e/tkm",
-                    "emissionFactorTTW": "7 gCO2e/tkm"
+                    "emissionFactorWTW": "8",
+                    "emissionFactorTTW": "7"
                 }
             ],
-            "co2eIntensityWTW": "10 gCO2e/tkm",
-            "co2eIntensityTTW": "9 gCO2e/tkm",
+            "co2eIntensityWTW": "10",
+            "co2eIntensityTTW": "9",
             "transportActivityUnit": "tkm"
         }
     }
