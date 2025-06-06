@@ -1,5 +1,7 @@
 from confluent_kafka import Producer
 from confluent_kafka import Consumer, KafkaException, KafkaError
+from config.settings import KAFKA_BOOTSTRAP_SERVERS
+
 import sys
 
 
@@ -12,7 +14,7 @@ def delivery_report(err, msg):
         print(f"Message delivered to {msg.topic()} [{msg.partition()}]")
 
 
-def send_message_to_kafka(topic_name, message, bootstrap_servers='localhost:9092'):
+def send_message_to_kafka(topic_name, message, bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS):
     conf = {'bootstrap.servers': bootstrap_servers}
     producer = Producer(conf)
 
@@ -24,7 +26,7 @@ def send_message_to_kafka(topic_name, message, bootstrap_servers='localhost:9092
         print(f"Error producing message: {e}")
 
 
-def consume_messages_from_kafka(topic_name, bootstrap_servers='localhost:9092', group_id='my_python_consumer_group') -> str:
+def consume_messages_from_kafka(topic_name, bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS, group_id='my_python_consumer_group') -> str:
     conf = {
         'bootstrap.servers': bootstrap_servers,
         'group.id': group_id,

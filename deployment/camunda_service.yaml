@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: camunda-service
-  namespace: proofing-system
+  namespace: proving-system
 spec:
   replicas: 1
   selector:
@@ -13,6 +13,10 @@ spec:
       labels:
         app: camunda-service
     spec:
+      initContainers:
+          - name: wait-for-zeebe
+            image: busybox
+            command: ['sh', '-c', 'until nc -z camunda-zeebe-gateway 26500; do echo waiting for Zeebe...; sleep 2; done']
       containers:
       - name: camunda-service
         image: camunda-service:latest
@@ -21,11 +25,13 @@ spec:
          - containerPort: 8000
         env:
         - name: ZEEBE_ADDRESS
-          value: "camunda-zeebe-gateway.proofing-system.svc.cluster.local:26500" # host:port form, da  Zeebe gRPC erwartet nicht HTTP
+          value: "camunda-zeebe-gateway:26500" # host:port form, da  Zeebe gRPC erwartet nicht HTTP
         - name: PROOFING_SERVICE_API_URL
           value: "http://proofing-service:3000" #http connection
         - name: SENSOR_SERVICE_API_URL
           value: "http://sensor-data-service:8080" #http connection
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: kafka.proving-system.svc.cluster.local:9092
         - name: LOG_LEVEL
           value: "INFO"
         - name: ACTIVITIES_OUTPUT_PATH

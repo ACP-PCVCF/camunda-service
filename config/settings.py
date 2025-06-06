@@ -1,7 +1,10 @@
 import os
 
 # Zeebe connection settings
-ZEEBE_ADDRESS = "localhost:26500"
+ZEEBE_ADDRESS = os.environ.get("ZEEBE_ADDRESS", "localhost:26500")
+
+#kafka connection
+KAFKA_BOOTSTRAP_SERVERS = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092')
 
 # API endpoints
 #PROOFING_SERVICE_URL = "http://localhost:8000/api/proofing"
