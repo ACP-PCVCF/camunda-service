@@ -1,5 +1,4 @@
 import unittest
-import pytest
 
 from models.proofing_document import ProofingDocument, ProofResponse
 from utils.kafka import send_message_to_kafka, consume_messages_from_kafka
@@ -7,7 +6,7 @@ from utils.kafka import send_message_to_kafka, consume_messages_from_kafka
 
 class kafka_communication_test(unittest.TestCase):
     def test_from_json_file(self):
-        filename = "shipment_3.json"
+        filename = "tests/shipment_3.json"
         content = None
         try:
             with open(filename, 'r', encoding='utf-8') as f:
@@ -23,7 +22,6 @@ class kafka_communication_test(unittest.TestCase):
         topic_out = "shipments"
         topic_in = "pcf-results"
 
-
         message_to_send = proofing_document.model_dump_json()
         send_message_to_kafka(topic_out, message_to_send)
         msg = consume_messages_from_kafka(topic_in)
@@ -33,4 +31,3 @@ class kafka_communication_test(unittest.TestCase):
         proof_response = ProofResponse.model_validate_json(msg)
 
         self.assertEqual(proof_response.proofReference, "123")
-
