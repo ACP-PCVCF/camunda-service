@@ -7,9 +7,11 @@ from pyzeebe import ZeebeWorker, ZeebeClient, Job
 from services.database import HocTocService
 from utils.error_handling import on_error
 from utils.logging_utils import log_task_start, log_task_completion
+from utils.kafka import send_message_to_kafka, consume_messages_from_kafka
 
 from services.service_implementations.service_sensordata import SensorDataService
 from models.product_footprint import ProductFootprint, Extension, ExtensionData, TceData, Distance
+from models.proofing_document import ProofingDocument, ProofResponse
 
 
 class CamundaWorkerTasks:
@@ -244,9 +246,21 @@ class CamundaWorkerTasks:
 
     def send_to_proofing_service(self, proofing_document: dict, product_footprint: dict) -> dict:
         # call proofing service by api
-        product_footprint_reference = product_footprint
+        topic_out = "shipments"
+        topic_in = "pcf-results"
 
-        return {"product_footprint": product_footprint_reference}
+        proofing_document_verified = ProofingDocument.model_validate(
+            proofing_document)
+
+        message_to_send = proofing_document_verified.model_dump_json()
+        send_message_to_kafka(topic_out, message_to_send)
+        msg = consume_messages_from_kafka(topic_in)
+
+        proof_response = ProofResponse.model_validate_json(msg)
+
+        # product_footprint_reference = "123"
+
+        return {"product_footprint": proof_response.proofReference}
 
     async def notify_next_node(self, message_name: str, shipment_information: dict) -> None:
         """
