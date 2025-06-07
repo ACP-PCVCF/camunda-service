@@ -6,7 +6,7 @@ from utils.kafka import send_message_to_kafka, consume_messages_from_kafka
 
 class kafka_communication_test(unittest.TestCase):
     def test_from_json_file(self):
-        filename = "tests/shipment_3.json"
+        filename = "data/proof_documents_examples/shipment_3.json"
         content = None
         try:
             with open(filename, 'r', encoding='utf-8') as f:
