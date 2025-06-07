@@ -58,7 +58,8 @@ class CamundaWorkerTasks:
         """
 
         log_task_start("collect_hoc_toc_data")
-        result = self.hoc_toc_service.collect_hoc_toc_data(product_footprint, sensor_data)
+        result = self.hoc_toc_service.collect_hoc_toc_data(
+            product_footprint, sensor_data)
         log_task_completion("collect_hoc_toc_data")
 
         return result
@@ -81,9 +82,7 @@ class CamundaWorkerTasks:
         new_tce_id = str(uuid.uuid4())
 
         process_id = job.process_instance_key
-        print(f"Received job for process instance: {process_id}")
         element_id = job.element_id
-        print(f"Element ID (from BPMN diagram): {element_id}")
 
         product_footprint_verified = ProductFootprint.model_validate(
             product_footprint)
@@ -101,7 +100,7 @@ class CamundaWorkerTasks:
             sensor_data = [new_sensor_data.model_dump()]
 
         distance_from_sensor = new_sensor_data.sensorData.distance.actual
-        #distance_from_sensor = random.uniform(10, 1000)
+        # distance_from_sensor = random.uniform(10, 1000)
 
         prev_tce_ids = []
 
@@ -244,10 +243,12 @@ class CamundaWorkerTasks:
     def call_service_sensordata_certificate(self):
         pass
 
-    def send_to_proofing_service(self, proofing_document: dict, product_footprint: dict) -> dict:
+    def send_to_proofing_service(self, proofing_document: dict) -> dict:
         # call proofing service by api
         topic_out = "shipments"
         topic_in = "pcf-results"
+
+        log_task_start("send_to_proofing_service")
 
         proofing_document_verified = ProofingDocument.model_validate(
             proofing_document)
@@ -258,7 +259,10 @@ class CamundaWorkerTasks:
 
         proof_response = ProofResponse.model_validate_json(msg)
 
-        # product_footprint_reference = "123"
+        print(f"Proofing response: {proof_response}")
+
+        log_task_completion("send_to_proofing_service",
+                            proof_reference=proof_response.proofReference)
 
         return {"product_footprint": proof_response.proofReference}
 
