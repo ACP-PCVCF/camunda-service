@@ -6,6 +6,7 @@ import grpc
 from grpc import aio
 import receipt_verifier_pb2
 import receipt_verifier_pb2_grpc
+from config.settings import VERIFIER_SERVICE_API_URL
 
 CHUNK_SIZE_BYTES = 3 * 1024 * 1024  # 3MB Chunks
 
@@ -26,7 +27,7 @@ async def read_file_chunks(file_path):
 
 async def main():
     # Server configuration
-    server_addr = "localhost:50051"
+    server_addr = VERIFIER_SERVICE_API_URL
     file_path = "./data/proof_verify_example/receipt_output.json"
 
     # Check if file exists
