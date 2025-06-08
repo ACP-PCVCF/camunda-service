@@ -5,6 +5,7 @@ ZEEBE_ADDRESS = os.environ.get("ZEEBE_ADDRESS", "localhost:26500")
 
 #kafka connection
 KAFKA_BOOTSTRAP_SERVERS = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092')
+VERIFIER_SERVICE_API_URL = os.getenv('VERIFIER_SERVICE_API_URL', 'localhost:50051')
 
 # API endpoints
 #PROOFING_SERVICE_URL = "http://localhost:8000/api/proofing"
