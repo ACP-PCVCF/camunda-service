@@ -48,10 +48,12 @@ class ReceiptVerifierService():
                 print(f"  Valid: {response.valid}")
                 print(f"  Message: {response.message}")
 
+                message = response.message
+
                 if response.HasField('journal_value'):
                     print(f"  Journal Value: {response.journal_value}")
 
             except grpc.RpcError as e:
                 print(f"gRPC Fehler: {e.code()}: {e.details()}")
 
-            return response.valid
+            return message
