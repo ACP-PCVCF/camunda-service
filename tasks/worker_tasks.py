@@ -51,7 +51,7 @@ class CamundaWorkerTasks:
         self.worker.task(task_type="verify_receipt",
                          exception_handler=on_error)(self.verify_receipt)
 
-    def verify_receipt(self, proofing_document: dict) -> str:
+    async def verify_receipt(self) -> dict:
         """
         Verify the receipt using the ReceiptVerifier service.
 
@@ -64,10 +64,10 @@ class CamundaWorkerTasks:
         log_task_start("verify_receipt")
 
         receipt_verifier = self.receipt_verifier_service
-        result = receipt_verifier.VerifyReceiptStream()
+        result = await receipt_verifier.VerifyReceiptStream()
 
         log_task_completion("verify_receipt")
-        return result
+        return {"verification_result": result}
 
     def collect_hoc_toc_data(self, product_footprint: dict, sensor_data: Optional[list[dict]] = None) -> dict:
         """
@@ -283,10 +283,12 @@ class CamundaWorkerTasks:
 
         print(f"Proofing response: {proof_response}")
 
+        result = proof_response.model_dump()
+
         log_task_completion("send_to_proofing_service",
                             proof_reference=proof_response.proofReference)
 
-        return {"product_footprint": proof_response.proofReference}
+        return {"product_footprint": result}
 
     async def notify_next_node(self, message_name: str, shipment_information: dict) -> None:
         """
