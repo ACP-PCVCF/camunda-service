@@ -30,6 +30,8 @@ spec:
           value: "http://proofing-service:3000" #http connection
         - name: SENSOR_SERVICE_API_URL
           value: "http://sensor-data-service:8080" #http connection
+        - name: VERIFIER_SERVICE_API_URL
+          value: verifier-service.verifier-system.svc.cluster.local:80
         - name: KAFKA_BOOTSTRAP_SERVERS
           value: kafka.proving-system.svc.cluster.local:9092
         - name: LOG_LEVEL

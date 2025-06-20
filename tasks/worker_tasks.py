@@ -9,6 +9,7 @@ from utils.error_handling import on_error
 from utils.logging_utils import log_task_start, log_task_completion
 from utils.kafka import send_message_to_kafka, consume_messages_from_kafka
 
+from services.service_implementations.service_verify import ReceiptVerifierService
 from services.service_implementations.service_sensordata import SensorDataService
 from models.product_footprint import ProductFootprint, Extension, ExtensionData, TceData, Distance
 from models.proofing_document import ProofingDocument, ProofResponse
@@ -22,6 +23,7 @@ class CamundaWorkerTasks:
         self.client = client
         self.hoc_toc_service = HocTocService()
         self.sensor_data_service = SensorDataService()
+        self.receipt_verifier_service = ReceiptVerifierService()
 
         # Register all tasks
         self._register_tasks()
@@ -46,6 +48,26 @@ class CamundaWorkerTasks:
                          exception_handler=on_error)(self.set_shipment_information)
         self.worker.task(task_type="collect_hoc_toc_data",
                          exception_handler=on_error)(self.collect_hoc_toc_data)
+        self.worker.task(task_type="verify_receipt",
+                         exception_handler=on_error)(self.verify_receipt)
+
+    async def verify_receipt(self) -> dict:
+        """
+        Verify the receipt using the ReceiptVerifier service.
+
+        Args:
+            proofing_document: Dictionary containing the proofing document to verify
+
+        Returns:
+            Dictionary containing the verification result
+        """
+        log_task_start("verify_receipt")
+
+        receipt_verifier = self.receipt_verifier_service
+        result = await receipt_verifier.VerifyReceiptStream()
+
+        log_task_completion("verify_receipt")
+        return {"verification_result": result}
 
     def collect_hoc_toc_data(self, product_footprint: dict, sensor_data: Optional[list[dict]] = None) -> dict:
         """
@@ -261,10 +283,12 @@ class CamundaWorkerTasks:
 
         print(f"Proofing response: {proof_response}")
 
+        result = proof_response.model_dump()
+
         log_task_completion("send_to_proofing_service",
                             proof_reference=proof_response.proofReference)
 
-        return {"product_footprint": proof_response.proofReference}
+        return {"product_footprint": result}
 
     async def notify_next_node(self, message_name: str, shipment_information: dict) -> None:
         """
