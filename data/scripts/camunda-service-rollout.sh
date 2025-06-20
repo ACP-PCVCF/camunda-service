@@ -15,7 +15,7 @@ echo "Switching to Minikube Docker context..."
 eval "$(minikube docker-env)"
 
 echo "Rebuilding Docker images with latest code..."
-docker build -t camunda-service:latest ./camunda-service
+docker build -t camunda-service:latest .
 
 echo "Applying updated manifests..."
 kubectl apply -f ./k8s/camunda-service.yaml -n $NAMESPACE

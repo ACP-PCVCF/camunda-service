@@ -91,10 +91,6 @@
       <bpmn:incoming>Flow_1wo6p0q</bpmn:incoming>
       <bpmn:outgoing>Flow_1btymzu</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:task id="Activity_0cbhr5w" name="Verify proof">
-      <bpmn:incoming>Flow_17l5onh</bpmn:incoming>
-      <bpmn:outgoing>Flow_0hkrjtr</bpmn:outgoing>
-    </bpmn:task>
     <bpmn:task id="Activity_0zeaidk" name="Get proof">
       <bpmn:incoming>Flow_0q1bfn6</bpmn:incoming>
       <bpmn:outgoing>Flow_17l5onh</bpmn:outgoing>
@@ -153,6 +149,13 @@
       <bpmn:outgoing>Flow_0g1yk4j</bpmn:outgoing>
     </bpmn:task>
     <bpmn:dataStoreReference id="DataStoreReference_0r8ej0i" name="Hoc/Toc Database" />
+    <bpmn:serviceTask id="Activity_0cbhr5w" name="Verify proof">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="verify_receipt" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_17l5onh</bpmn:incoming>
+      <bpmn:outgoing>Flow_0hkrjtr</bpmn:outgoing>
+    </bpmn:serviceTask>
   </bpmn:process>
   <bpmn:message id="Message_3aft3ev" name="Case2Start" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -198,10 +201,6 @@
       <bpmndi:BPMNShape id="Gateway_0fm17sn_di" bpmnElement="Gateway_0fm17sn" isMarkerVisible="true">
         <dc:Bounds x="535" y="255" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0cbhr5w_di" bpmnElement="Activity_0cbhr5w">
-        <dc:Bounds x="510" y="400" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0zeaidk_di" bpmnElement="Activity_0zeaidk">
         <dc:Bounds x="380" y="400" width="100" height="80" />
         <bpmndi:BPMNLabel />
@@ -226,6 +225,9 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1685" y="722" width="90" height="14" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1w7smqc_di" bpmnElement="Activity_0cbhr5w">
+        <dc:Bounds x="510" y="400" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0b7bi06_di" bpmnElement="Flow_0b7bi06">
         <di:waypoint x="1430" y="490" />
@@ -308,6 +310,10 @@
         <di:waypoint x="188" y="280" />
         <di:waypoint x="260" y="280" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataInputAssociation_1w2unl1_di" bpmnElement="DataInputAssociation_1w2unl1">
+        <di:waypoint x="1730" y="665" />
+        <di:waypoint x="1730" y="530" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0xm8se6_di" bpmnElement="Flow_0xm8se6">
         <di:waypoint x="1610" y="490" />
         <di:waypoint x="1680" y="490" />
@@ -315,10 +321,6 @@
       <bpmndi:BPMNEdge id="Flow_1dwfkc2_di" bpmnElement="Flow_1dwfkc2">
         <di:waypoint x="1780" y="490" />
         <di:waypoint x="1850" y="490" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="DataInputAssociation_1w2unl1_di" bpmnElement="DataInputAssociation_1w2unl1">
-        <di:waypoint x="1730" y="665" />
-        <di:waypoint x="1730" y="530" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
