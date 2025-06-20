@@ -1,18 +1,18 @@
 import random
 import uuid
-import datetime
 from typing import Optional
 
 from pyzeebe import ZeebeWorker, ZeebeClient, Job
-from services.database import HocTocService
+
 from utils.error_handling import on_error
 from utils.logging_utils import log_task_start, log_task_completion
-from utils.kafka import send_message_to_kafka, consume_messages_from_kafka
 
-from services.service_implementations.service_verify import ReceiptVerifierService
-from services.service_implementations.service_sensordata import SensorDataService
-from models.product_footprint import ProductFootprint, Extension, ExtensionData, TceData, Distance
-from models.proofing_document import ProofingDocument, ProofResponse
+from services.database import HocTocService
+from services.verifier_service import ReceiptVerifierService
+from services.sensor_data_service import SensorDataService
+from services.proving_service import ProofingService
+from services.product_footprint import ProductFootprintService
+from services.logistics_operation_service import LogisticsOperationService
 
 
 class CamundaWorkerTasks:
@@ -24,6 +24,10 @@ class CamundaWorkerTasks:
         self.hoc_toc_service = HocTocService()
         self.sensor_data_service = SensorDataService()
         self.receipt_verifier_service = ReceiptVerifierService()
+        self.proofing_service = ProofingService()
+        self.product_footprint_service = ProductFootprintService()
+        self.logistics_operation_service = LogisticsOperationService(
+            self.sensor_data_service)
 
         # Register all tasks
         self._register_tasks()
@@ -88,7 +92,7 @@ class CamundaWorkerTasks:
 
     def transport_procedure(self, tocId: int, product_footprint: dict, job: Job, sensor_data: Optional[list[dict]] = None) -> dict:
         """
-        Handle the hub procedure for a given tocId and product footprint.
+        Handle the transport procedure for a given tocId and product footprint using LogisticsOperationService.
 
         Args:
             tocId: Unique identifier for the transport operation category (toc)
@@ -99,66 +103,17 @@ class CamundaWorkerTasks:
         Returns:
             product_footprint with tocId Information
         """
-
         log_task_start("transport_procedure")
-        new_tce_id = str(uuid.uuid4())
 
-        process_id = job.process_instance_key
-        element_id = job.element_id
+        result = self.logistics_operation_service.execute_transport_procedure(
+            tocId, product_footprint, job, sensor_data)
 
-        product_footprint_verified = ProductFootprint.model_validate(
-            product_footprint)
-        # call greta with TceSensorData object, filled with new_tce_id, camunda Process Instance Key and camunda Activity Id
-        # receive instance of TceSensorData back
-        new_sensor_data = self.sensor_data_service.call_service_sensordata({
-            "shipment_id": product_footprint_verified.extensions[0].data.shipmentId,
-            "tceId": new_tce_id,
-            "camundaProcessInstanceKey": str(process_id),
-            "camundaActivityId": element_id
-        })
-        if sensor_data is not None:
-            sensor_data.append(new_sensor_data.model_dump())
-        else:
-            sensor_data = [new_sensor_data.model_dump()]
-
-        distance_from_sensor = new_sensor_data.sensorData.distance.actual
-        # distance_from_sensor = random.uniform(10, 1000)
-
-        prev_tce_ids = []
-
-        if len(product_footprint_verified.extensions[0].data.tces) > 0:
-            prev_tce_ids = product_footprint_verified.extensions[0].data.tces[-1].prevTceIds.copy(
-            )
-            last_tceid = product_footprint_verified.extensions[0].data.tces[-1].tceId
-
-            prev_tce_ids.append(last_tceid)
-
-        new_TCE = TceData(
-            tceId=new_tce_id,
-            shipmentId=product_footprint_verified.extensions[0].data.shipmentId,
-            mass=product_footprint_verified.extensions[0].data.mass,
-            distance=Distance(
-                actual=distance_from_sensor
-            ),
-            tocId=tocId,
-            prevTceIds=prev_tce_ids
-        )
-
-        product_footprint_verified.extensions[0].data.tces.append(
-            new_TCE
-        )
-
-        result = {
-            "product_footprint": product_footprint_verified.model_dump(),
-            "sensor_data": sensor_data
-        }
         log_task_completion("transport_procedure")
-
         return result
 
     def hub_procedure(self, hocId: str, product_footprint: dict) -> dict:
         """
-        Handle the hub procedure for a given hocId and product footprint.
+        Handle the hub procedure for a given hocId and product footprint using LogisticsOperationService.
 
         Args:
             hocId: Unique identifier for the hub operation category (hoc)
@@ -167,75 +122,31 @@ class CamundaWorkerTasks:
         Returns:
             product_footprint with hocId Information
         """
-
         log_task_start("hub_procedure")
 
-        product_footprint_verified = ProductFootprint.model_validate(
-            product_footprint)
-
-        prev_tce_ids = []
-        if len(product_footprint_verified.extensions[0].data.tces) > 0:
-            prev_tce_ids = product_footprint_verified.extensions[0].data.tces[-1].prevTceIds.copy(
-            )
-            last_tceid = product_footprint_verified.extensions[0].data.tces[-1].tceId
-
-            prev_tce_ids.append(last_tceid)
-
-        new_TCE = TceData(
-            tceId=str(uuid.uuid4()),
-            shipmentId=product_footprint_verified.extensions[0].data.shipmentId,
-            mass=product_footprint_verified.extensions[0].data.mass,
-            hocId=hocId,
-            prevTceIds=prev_tce_ids
-        )
-        product_footprint_verified.extensions[0].data.tces.append(
-            new_TCE
-        )
-        result = {
-            "product_footprint": product_footprint_verified.model_dump()
-        }
+        # Use the logistics operation service to handle the hub procedure
+        result = self.logistics_operation_service.execute_hub_procedure(
+            hocId, product_footprint)
 
         log_task_completion("hub_procedure")
-
         return result
 
     def define_product_footprint_template(self, company_name: str, shipment_information: dict) -> dict:
         """
-        Define a product footprint.
+        Define a product footprint template using the ProductFootprintService.
+
+        Args:
+            company_name: Name of the company creating the footprint
+            shipment_information: Dictionary containing shipment details
 
         Returns:
             Dictionary containing the product footprint
         """
         log_task_start("define_product_footprint_template")
 
-        product_footprint = ProductFootprint(
-            id=str(uuid.uuid4()),
-            created=datetime.datetime.now().isoformat(),
-            specVersion="2.0.0",
-            version=0,
-            status="Active",
-            companyName=company_name,
-            companyIds=[f"urn:epcidsgln:{uuid.uuid4()}"],
-            productDescription=f"Logistics emissions related to shipment with ID {shipment_information.get('shipment_id', 'unknown')}",
-            productIds=[
-                f"urn:pathfinder:product:customcode:vendor-assigned:{uuid.uuid4()}"],
-            productCategoryCpc=random.randint(1000, 9999),
-            productNameCompany=f"Shipment with ID {shipment_information.get('shipment_id', 'unknown')}",
-            extensions=[
-                Extension(
-                    dataSchema="https://api.ileap.sine.dev/shipment-footprint.json",
-                    data=ExtensionData(
-                        mass=shipment_information.get(
-                            "shipment_weight", random.uniform(1000, 20000)),
-                        shipmentId=shipment_information.get(
-                            "shipment_id", f"SHIP_{uuid.uuid4()}")
-                    )
-                )
-            ]
-        )
-        result = {
-            "product_footprint": product_footprint.model_dump()
-        }
+        # Use the product footprint service to create the template
+        result = self.product_footprint_service.create_product_footprint_template(
+            company_name, shipment_information)
 
         log_task_completion("define_product_footprint_template")
         return result
@@ -259,34 +170,23 @@ class CamundaWorkerTasks:
         log_task_completion("determine_job_sequence", **result)
         return result
 
-    def call_service_sensordata(self):
-        pass
-
-    def call_service_sensordata_certificate(self):
-        pass
-
     def send_to_proofing_service(self, proofing_document: dict) -> dict:
-        # call proofing service by api
-        topic_out = "shipments"
-        topic_in = "pcf-results"
+        """
+        Send proofing document to the proofing service.
 
+        Args:
+            proofing_document: Dictionary containing the proofing document
+
+        Returns:
+            Dictionary containing the proof response
+        """
         log_task_start("send_to_proofing_service")
 
-        proofing_document_verified = ProofingDocument.model_validate(
+        result = self.proofing_service.send_proofing_document(
             proofing_document)
 
-        message_to_send = proofing_document_verified.model_dump_json()
-        send_message_to_kafka(topic_out, message_to_send)
-        msg = consume_messages_from_kafka(topic_in)
-
-        proof_response = ProofResponse.model_validate_json(msg)
-
-        print(f"Proofing response: {proof_response}")
-
-        result = proof_response.model_dump()
-
         log_task_completion("send_to_proofing_service",
-                            proof_reference=proof_response.proofReference)
+                            proof_reference=result.get("proofReference"))
 
         return {"product_footprint": result}
 
