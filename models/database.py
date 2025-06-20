@@ -1,7 +1,6 @@
 import sqlite3
 import json
 from config.database_config import DatabaseConfig
-from typing import Optional, Dict, Any
 
 
 class HocTocDatabase:
@@ -105,51 +104,3 @@ class HocTocDatabase:
 
         conn.commit()
         conn.close()
-
-    def get_hoc_data(self, hoc_id: str) -> Optional[Dict[str, Any]]:
-        """Get HOC data by ID."""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-
-        cursor.execute('SELECT * FROM hoc_data WHERE hoc_id = ?', (hoc_id,))
-        row = cursor.fetchone()
-        conn.close()
-
-        if row:
-            return {
-                "hocId": row[0],
-                "passhubType": row[1],
-                "energyCarriers": json.loads(row[2]),
-                "co2eIntensityWTW": row[3],
-                "co2eIntensityTTW": row[4],
-                "hubActivityUnit": row[5]
-            }
-        return None
-
-    def get_toc_data(self, toc_id: str) -> Optional[Dict[str, Any]]:
-        """Get TOC data by ID."""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-
-        cursor.execute('SELECT * FROM toc_data WHERE toc_id = ?', (toc_id,))
-        row = cursor.fetchone()
-        conn.close()
-
-        if row:
-            return {
-                "tocId": row[0],
-                "certifications": json.loads(row[1]),
-                "description": row[2],
-                "mode": row[3],
-                "loadFactor": row[4],
-                "emptyDistanceFactor": row[5],
-                "temperatureControl": row[6],
-                "truckLoadingSequence": row[7],
-                "airShippingOption": row[8],
-                "flightLength": row[9],
-                "energyCarriers": json.loads(row[10]),
-                "co2eIntensityWTW": row[11],
-                "co2eIntensityTTW": row[12],
-                "transportActivityUnit": row[13]
-            }
-        return None

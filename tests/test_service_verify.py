@@ -1,4 +1,4 @@
-from services.service_implementations.service_verify import ReceiptVerifierService
+from services.verifier_service import ReceiptVerifierService
 import unittest
 
 

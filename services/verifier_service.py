@@ -1,5 +1,5 @@
-import services.service_implementations.receipt_verifier_pb2 as receipt_verifier_pb2
-import services.service_implementations.receipt_verifier_pb2_grpc as receipt_verifier_pb2_grpc
+import services.pb.receipt_verifier_pb2 as receipt_verifier_pb2
+import services.pb.receipt_verifier_pb2_grpc as receipt_verifier_pb2_grpc
 from pathlib import Path
 import grpc
 from grpc import aio
@@ -9,9 +9,7 @@ CHUNK_SIZE_BYTES = 3 * 1024 * 1024  # 3MB Chunks
 
 
 class ReceiptVerifierService():
-    def __init__(self):
-        cwd = os.getcwd()
-        print(cwd)
+    """Service to verify proof receipts using gRPC streaming."""
 
     def __read_file_chunks(self, file_path, chunk_size=1024):
         """Generator to read a file in chunks."""

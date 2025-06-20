@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import services.service_implementations.receipt_verifier_pb2 as receipt__verifier__pb2
+import services.pb.receipt_verifier_pb2 as receipt__verifier__pb2
 
 GRPC_GENERATED_VERSION = '1.66.2'
 GRPC_VERSION = grpc.__version__
