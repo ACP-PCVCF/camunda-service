@@ -4,6 +4,7 @@ import os
 
 from models.sensor_data import TceSensorData
 from utils.logging_utils import log_service_call
+from config.settings import SENSOR_DATA_SERVICE_URL
 
 
 class SensorDataService:
@@ -11,8 +12,7 @@ class SensorDataService:
 
     def __init__(self):
         log_service_call("SensorDataService", "__init__")
-        self.base_url = os.getenv(
-            "SENSOR_SERVICE_API_URL", "http://localhost:8000")
+        self.base_url = SENSOR_DATA_SERVICE_URL
 
     def call_service_sensordata(self, variables) -> TceSensorData:
         shipment_id = variables.get("shipment_id", "unknown")
@@ -50,9 +50,6 @@ class SensorDataService:
             response.raise_for_status()
             response_data = response.json()
 
-            print(f"Response data: {response_data}")
-
-            # Parse sensorData if it's a JSON string
             if 'sensorData' in response_data and isinstance(response_data['sensorData'], str):
                 response_data['sensorData'] = json.loads(
                     response_data['sensorData'])

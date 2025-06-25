@@ -9,8 +9,10 @@ class SensorData(BaseModel):
 
 class TceSensorData(BaseModel):
     tceId: str
-    camundaProcessInstanceKey: str | int
+    camundaProcessInstanceKey: str
     camundaActivityId: str
     sensorkey: str
     signedSensorData: str
     sensorData: SensorData
+    salt: str
+    commitment: str
