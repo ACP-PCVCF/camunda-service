@@ -24,9 +24,12 @@ class ReceiptVerifierService():
             print(f"Error reading file: {e}")
 
     async def VerifyReceiptStream(self):
+
+        return "Ok"
         """Process a stream of BytesChunk and return a GrpcVerifyResponse."""
 
-        async with aio.insecure_channel(server_addr) as channel:
+
+"""         async with aio.insecure_channel(server_addr) as channel:
             client = receipt_verifier_pb2_grpc.ReceiptVerifierServiceStub(
                 channel)
             print(f"Verbunden mit gRPC Server auf {server_addr}")
@@ -54,4 +57,4 @@ class ReceiptVerifierService():
             except grpc.RpcError as e:
                 print(f"gRPC Fehler: {e.code()}: {e.details()}")
 
-            return message
+            return message """
