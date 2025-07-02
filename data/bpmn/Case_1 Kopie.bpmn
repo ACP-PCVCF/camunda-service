@@ -31,7 +31,7 @@
     <bpmn:startEvent id="Event_1kibn11">
       <bpmn:outgoing>Flow_1q60osb</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:task id="Activity_0zeaidk" name="Get proof">
+    <bpmn:task id="Activity_0zeaidk" name="Get proof from PCF Registry">
       <bpmn:incoming>Flow_04njxeq</bpmn:incoming>
       <bpmn:outgoing>Flow_0moojfe</bpmn:outgoing>
     </bpmn:task>
