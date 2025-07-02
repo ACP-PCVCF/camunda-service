@@ -84,7 +84,7 @@
       <bpmn:incoming>Flow_1wo6p0q</bpmn:incoming>
       <bpmn:outgoing>Flow_1btymzu</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:task id="Activity_0zeaidk" name="Get proof">
+    <bpmn:task id="Activity_0zeaidk" name="Get proof from PCF Registry">
       <bpmn:incoming>Flow_0q1bfn6</bpmn:incoming>
       <bpmn:outgoing>Flow_17l5onh</bpmn:outgoing>
     </bpmn:task>
