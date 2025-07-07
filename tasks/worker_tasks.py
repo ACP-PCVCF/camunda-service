@@ -1,6 +1,7 @@
 import random
 import uuid
 from typing import Optional
+import os
 
 from pyzeebe import ZeebeWorker, ZeebeClient, Job
 
@@ -37,7 +38,7 @@ class CamundaWorkerTasks:
         self.worker.task(task_type="determine_job_sequence",
                          exception_handler=on_error)(self.determine_job_sequence)
         self.worker.task(task_type="send_to_proofing_service",
-                         exception_handler=on_error)(self.send_to_proofing_service)
+                         exception_handler=on_error, timeout_ms=600000)(self.send_to_proofing_service)
         self.worker.task(task_type="notify_next_node",
                          exception_handler=on_error)(self.notify_next_node)
         self.worker.task(task_type="send_data_to_origin",
@@ -247,6 +248,15 @@ class CamundaWorkerTasks:
             Dictionary containing the new shipment ID and weight
         """
         log_task_start("set_shipment_information")
+
+        # Delete proof_response.json file if it exists
+        proof_response_path = "data/proof_documents_examples/proof_response.json"
+        try:
+            if os.path.exists(proof_response_path):
+                os.remove(proof_response_path)
+                print(f"Deleted {proof_response_path}")
+        except OSError as e:
+            print(f"Error deleting {proof_response_path}: {e}")
 
         shipment_id = f"SHIP_{uuid.uuid4()}"
         weight = random.uniform(1000, 20000)

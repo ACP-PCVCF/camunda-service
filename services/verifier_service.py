@@ -4,6 +4,7 @@ from pathlib import Path
 import grpc
 from grpc import aio
 import os
+import json
 from config.settings import VERIFIER_SERVICE_API_URL as server_addr
 CHUNK_SIZE_BYTES = 3 * 1024 * 1024  # 3MB Chunks
 
@@ -11,17 +12,21 @@ CHUNK_SIZE_BYTES = 3 * 1024 * 1024  # 3MB Chunks
 class ReceiptVerifierService():
     """Service to verify proof receipts using gRPC streaming."""
 
-    def __read_file_chunks(self, file_path, chunk_size=1024):
-        """Generator to read a file in chunks."""
+    def __read_data_chunks(self, data, chunk_size=1024):
+        """Generator to read data in chunks."""
         try:
-            with open(file_path, 'rb') as f:
-                while True:
-                    chunk = f.read(chunk_size)
-                    if not chunk:
-                        break
-                    yield receipt_verifier_pb2.BytesChunk(data=chunk)
+            # Convert string data to bytes if needed
+            if isinstance(data, str):
+                data_bytes = data.encode('utf-8')
+            else:
+                data_bytes = data
+
+            # Split data into chunks
+            for i in range(0, len(data_bytes), chunk_size):
+                chunk = data_bytes[i:i + chunk_size]
+                yield receipt_verifier_pb2.BytesChunk(data=chunk)
         except Exception as e:
-            print(f"Error reading file: {e}")
+            print(f"Error reading data: {e}")
 
     async def VerifyReceiptStream(self):
         """Process a stream of BytesChunk and return a GrpcVerifyResponse."""
@@ -33,25 +38,35 @@ class ReceiptVerifierService():
 
             # Create the stream of chunks
             # Until Felix database is available, we use a static file
-            file_path = "./data/proof_verify_example/receipt_output.json"
-            chunk_stream = self.__read_file_chunks(file_path)
+            if os.path.exists("data/proof_documents_examples/proof_response.json"):
+                with open("data/proof_documents_examples/proof_response.json", "r") as f:
+                    proof_response = json.load(f)
 
-            print("Starte Stream zum Server...")
+                    verifier_data = {}
+                    verifier_data['receipt'] = proof_response['proofReceipt']
+                    verifier_data['image_id'] = proof_response['imageId']
 
-            # Call the streaming RPC
-            try:
-                response = await client.VerifyReceiptStream(chunk_stream)
+                    chunk_stream = self.__read_data_chunks(
+                        json.dumps(verifier_data))
 
-                print("gRPC Antwort erhalten:")
-                print(f"  Valid: {response.valid}")
-                print(f"  Message: {response.message}")
+                    print("Starte Stream zum Server...")
 
-                message = response.message
+                    # Call the streaming RPC
+                    try:
+                        response = await client.VerifyReceiptStream(chunk_stream)
 
-                if response.HasField('journal_value'):
-                    print(f"  Journal Value: {response.journal_value}")
+                        print("gRPC Antwort erhalten:")
+                        print(f"  Valid: {response.valid}")
+                        print(f"  Message: {response.message}")
 
-            except grpc.RpcError as e:
-                print(f"gRPC Fehler: {e.code()}: {e.details()}")
+                        message = response.message
 
-            return message
+                        if response.HasField('journal_value'):
+                            print(f"  Journal Value: {response.journal_value}")
+
+                    except grpc.RpcError as e:
+                        print(f"gRPC Fehler: {e.code()}: {e.details()}")
+
+                    return message
+
+            return "No proof response file found or invalid file path."
