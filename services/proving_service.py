@@ -21,19 +21,7 @@ class ProofingService:
         self.topic_in = topic_in
 
     def send_proofing_document(self, proofing_document: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Send a proofing document to the proofing service and receive the response.
 
-        Args:
-            proofing_document: Dictionary containing the proofing document data
-
-        Returns:
-            Dictionary containing the proof response
-
-        Raises:
-            ValidationError: If the proofing document is invalid
-            Exception: If there's an error in Kafka communication
-        """
         log_service_call("ProofingService", "send_proofing_document")
 
         print("Sending proofing document to Kafka...")
@@ -56,6 +44,7 @@ class ProofingService:
 
         print("Message sent to Kafka topic.")
 
+    def receive_proof_response(self) -> ProofResponse:
         response_message = consume_messages_from_kafka(self.topic_in)
 
         proof_response = ProofResponse.model_validate_json(response_message)
