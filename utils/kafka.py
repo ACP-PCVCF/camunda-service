@@ -32,7 +32,8 @@ def consume_messages_from_kafka(topic_name, bootstrap_servers=KAFKA_BOOTSTRAP_SE
         'group.id': group_id,
         'auto.offset.reset': 'earliest',
         'enable.auto.commit': True,
-        'auto.commit.interval.ms': 5000
+        'auto.commit.interval.ms': 5000,
+        'auto.offset.reset': 'latest'
     }
 
     consumer = Consumer(conf)
