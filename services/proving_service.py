@@ -1,3 +1,5 @@
+import json
+import os
 from typing import Dict, Any
 from models.proofing_document import ProofingDocument, ProofResponse
 from utils.kafka import send_message_to_kafka, consume_messages_from_kafka
@@ -19,36 +21,49 @@ class ProofingService:
         self.topic_in = topic_in
 
     def send_proofing_document(self, proofing_document: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Send a proofing document to the proofing service and receive the response.
 
-        Args:
-            proofing_document: Dictionary containing the proofing document data
-
-        Returns:
-            Dictionary containing the proof response
-
-        Raises:
-            ValidationError: If the proofing document is invalid
-            Exception: If there's an error in Kafka communication
-        """
         log_service_call("ProofingService", "send_proofing_document")
 
-        # Validate the proofing document using Pydantic model
+        print("Sending proofing document to Kafka...")
+
         proofing_document_verified = ProofingDocument.model_validate(
             proofing_document)
 
-        # Convert to JSON and send to Kafka
+        if os.path.exists("data/proof_documents_examples/proof_response.json"):
+            with open("data/proof_documents_examples/proof_response.json", "r") as f:
+                data = json.load(f)
+                data = ProofResponse.model_validate(data)
+                proofing_document_verified.proof.append(data)
+                print(proofing_document_verified.proof[0].productFootprintId)
+
+        print("Proofing document verified and ready to send.")
+
         message_to_send = proofing_document_verified.model_dump_json()
+
         send_message_to_kafka(self.topic_out, message_to_send)
 
-        # Consume response from Kafka
+        print("Message sent to Kafka topic.")
+
+    def receive_proof_response(self) -> ProofResponse:
         response_message = consume_messages_from_kafka(self.topic_in)
 
-        # Validate and parse the response
         proof_response = ProofResponse.model_validate_json(response_message)
 
-        return proof_response.model_dump()
+        response_dict = proof_response.model_dump()
+
+        # Delete proof_response.json file if it exists
+        proof_response_path = "data/proof_documents_examples/proof_response.json"
+        try:
+            if os.path.exists(proof_response_path):
+                os.remove(proof_response_path)
+                print(f"Deleted {proof_response_path}")
+        except OSError as e:
+            print(f"Error deleting {proof_response_path}: {e}")
+
+        with open("data/proof_documents_examples/proof_response.json", "w") as f:
+            json.dump(response_dict, f, indent=4)
+
+        return response_dict
 
     def validate_proofing_document(self, proofing_document: Dict[str, Any]) -> ProofingDocument:
         """
