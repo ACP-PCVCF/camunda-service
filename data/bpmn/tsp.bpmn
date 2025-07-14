@@ -7,7 +7,7 @@
       <bpmn:extensionElements>
         <zeebe:calledElement processId="=subprocess_id" propagateAllChildVariables="false" propagateAllParentVariables="false" />
         <zeebe:ioMapping>
-          <zeebe:input source="=product_footprints[count(product_footprints)]" target="previous_product_footprint" />
+          <zeebe:input source="=if product_footprints[3] != null then product_footprints[3] else if product_footprints[2] != null then product_footprints[2] else product_footprints[1]" target="previous_product_footprint" />
           <zeebe:input source="=shipment_information" target="shipment_information" />
           <zeebe:output source="=product_footprint" target="intstance_scf" />
         </zeebe:ioMapping>

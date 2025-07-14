@@ -56,7 +56,7 @@ class CamundaWorkerTasks:
         self.worker.task(task_type="verify_receipt",
                          exception_handler=on_error)(self.verify_receipt)
         self.worker.task(task_type="consume_proof_response",
-                         exception_handler=on_error)(self.consume_proof_response)
+                         exception_handler=on_error, timeout_ms=600000)(self.consume_proof_response)
 
     def consume_proof_response(self) -> dict:
         """
