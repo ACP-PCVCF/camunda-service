@@ -13,6 +13,8 @@ SENSOR_DATA_SERVICE_URL = os.getenv(
     "SENSOR_SERVICE_API_URL", "http://localhost:8000")
 VERIFIER_SERVICE_API_URL = os.getenv(
     'VERIFIER_SERVICE_API_URL', "localhost:50051")
+PCF_REGISTRY_SERVER_ADDRESS = os.getenv(
+    'PCF_REGISTRY_SERVER_ADDRESS', "localhost:50052")
 
 # Authentication
 
