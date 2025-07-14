@@ -84,10 +84,6 @@
       <bpmn:incoming>Flow_1wo6p0q</bpmn:incoming>
       <bpmn:outgoing>Flow_1btymzu</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:task id="Activity_0zeaidk" name="Get proof from PCF Registry">
-      <bpmn:incoming>Flow_0q1bfn6</bpmn:incoming>
-      <bpmn:outgoing>Flow_17l5onh</bpmn:outgoing>
-    </bpmn:task>
     <bpmn:exclusiveGateway id="Gateway_0n4ialk" name="Is there an entry in the proofs array in the product footprint template from TSP?" default="Flow_1wo6p0q">
       <bpmn:incoming>Flow_17ypmzq</bpmn:incoming>
       <bpmn:outgoing>Flow_0q1bfn6</bpmn:outgoing>
@@ -192,6 +188,13 @@
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_0ot2jgg" sourceRef="Activity_01j1qvb" targetRef="Activity_16a69um" />
     <bpmn:sequenceFlow id="Flow_0pm3xc6" sourceRef="Activity_16a69um" targetRef="Gateway_1qcy82f" />
+    <bpmn:serviceTask id="Activity_0zeaidk" name="Get proof from PCF Registry">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="get_proof_from_pcf_registry" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0q1bfn6</bpmn:incoming>
+      <bpmn:outgoing>Flow_17l5onh</bpmn:outgoing>
+    </bpmn:serviceTask>
   </bpmn:process>
   <bpmn:message id="Message_3aft3ev" name="Case2Start" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -237,10 +240,6 @@
       <bpmndi:BPMNShape id="Gateway_0fm17sn_di" bpmnElement="Gateway_0fm17sn" isMarkerVisible="true">
         <dc:Bounds x="595" y="255" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0zeaidk_di" bpmnElement="Activity_0zeaidk">
-        <dc:Bounds x="390" y="400" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_0n4ialk_di" bpmnElement="Gateway_0n4ialk" isMarkerVisible="true">
         <dc:Bounds x="415" y="255" width="50" height="50" />
         <bpmndi:BPMNLabel>
@@ -281,12 +280,15 @@
         <dc:Bounds x="2150" y="520" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1qnv8fd_di" bpmnElement="Event_1qnv8fd">
-        <dc:Bounds x="2992" y="262" width="36" height="36" />
+      <bpmndi:BPMNShape id="Gateway_1qcy82f_di" bpmnElement="Gateway_1qcy82f" isMarkerVisible="true">
+        <dc:Bounds x="2655" y="255" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0nbxy9n_di" bpmnElement="Activity_0nbxy9n">
         <dc:Bounds x="2790" y="240" width="100" height="80" />
         <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1qnv8fd_di" bpmnElement="Event_1qnv8fd">
+        <dc:Bounds x="2992" y="262" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="DataStoreReference_0ec24uj_di" bpmnElement="DataStoreReference_0ec24uj">
         <dc:Bounds x="2815" y="525" width="50" height="50" />
@@ -294,11 +296,11 @@
           <dc:Bounds x="2807" y="582" width="66" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_1qcy82f_di" bpmnElement="Gateway_1qcy82f" isMarkerVisible="true">
-        <dc:Bounds x="2655" y="255" width="50" height="50" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_04l3zla_di" bpmnElement="Activity_16a69um">
         <dc:Bounds x="2500" y="240" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0aa842n_di" bpmnElement="Activity_0zeaidk">
+        <dc:Bounds x="390" y="400" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0b7bi06_di" bpmnElement="Flow_0b7bi06">
         <di:waypoint x="1630" y="280" />
