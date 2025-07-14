@@ -1,0 +1,5 @@
+zeebe:
+  enabled: true
+
+zeebe-gateway:
+  enabled: true
