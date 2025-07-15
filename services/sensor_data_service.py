@@ -1,6 +1,5 @@
 import json
 import requests
-import os
 
 from models.sensor_data import TceSensorData
 from utils.logging_utils import log_service_call

@@ -1,12 +1,13 @@
-import services.pb.receipt_verifier_pb2 as receipt_verifier_pb2
-import services.pb.receipt_verifier_pb2_grpc as receipt_verifier_pb2_grpc
-from pathlib import Path
 import grpc
-from grpc import aio
 import os
 import json
+
+import services.pb.receipt_verifier_pb2 as receipt_verifier_pb2
+import services.pb.receipt_verifier_pb2_grpc as receipt_verifier_pb2_grpc
+
+from grpc import aio
 from config.settings import VERIFIER_SERVICE_API_URL as server_addr
-CHUNK_SIZE_BYTES = 3 * 1024 * 1024  # 3MB Chunks
+CHUNK_SIZE_BYTES = 3 * 1024 * 1024
 
 
 class ReceiptVerifierService():
@@ -15,13 +16,11 @@ class ReceiptVerifierService():
     def __read_data_chunks(self, data, chunk_size=1024):
         """Generator to read data in chunks."""
         try:
-            # Convert string data to bytes if needed
             if isinstance(data, str):
                 data_bytes = data.encode('utf-8')
             else:
                 data_bytes = data
 
-            # Split data into chunks
             for i in range(0, len(data_bytes), chunk_size):
                 chunk = data_bytes[i:i + chunk_size]
                 yield receipt_verifier_pb2.BytesChunk(data=chunk)
@@ -36,8 +35,7 @@ class ReceiptVerifierService():
                 channel)
             print(f"Verbunden mit gRPC Server auf {server_addr}")
 
-            # Create the stream of chunks
-            # Until Felix database is available, we use a static file
+            # This is the proof response which we download from the PCF registry earlier
             if os.path.exists("data/proof_documents_examples/proof_response.json"):
                 with open("data/proof_documents_examples/proof_response.json", "r") as f:
                     proof_response = json.load(f)
@@ -51,7 +49,6 @@ class ReceiptVerifierService():
 
                     print("Starte Stream zum Server...")
 
-                    # Call the streaming RPC
                     try:
                         response = await client.VerifyReceiptStream(chunk_stream)
 

@@ -1,10 +1,11 @@
 import json
 import os
+
 from .pcf_registry_service import PCFRegistryService
-from typing import Dict, Any
 from models.proofing_document import ProofingDocument, ProofResponse
 from utils.kafka import send_message_to_kafka, consume_messages_from_kafka
 from utils.logging_utils import log_service_call
+from typing import Dict, Any
 
 
 class ProofingService:

@@ -1,13 +1,13 @@
-from models.database import HocTocDatabase
-from models.proofing_document import ProofingDocument
-from models.product_footprint import ProductFootprint
-from typing import Optional, Dict, Any
 import sqlite3
 import json
 
+from models.database import HocTocDatabase
+from models.proofing_document import ProofingDocument
+from models.product_footprint import ProductFootprint
+from models.logistics_operations import HocData, TocData
 from models.sensor_data import TceSensorData
 from utils.data_utils import get_mock_data
-from models.logistics_operations import HocData, TocData
+from typing import Optional, Dict, Any
 
 
 class HocTocService:

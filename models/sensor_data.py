@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-
 from models.product_footprint import Distance
 
 
