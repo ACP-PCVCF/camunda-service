@@ -105,8 +105,8 @@ The service registers the following task handlers:
 7. **`transport_procedure`** - Handles transport logistics with sensor data integration
 8. **`set_shipment_information`** - Initializes shipment metadata
 9. **`collect_hoc_toc_data`** - Collects hub and transport data
-10. **`verify_receipt`** - Verifies transport receipts via gRPC
-11. **`consume_proof_response`** - Consumes proof responses from Kafka
+10. **`verify_receipt`** - Verifies proof receipts via gRPC
+11. **`consume_proof_response`** - Consumes proof responses from Kafka and uploads proofs to PCF registry
 12. **`get_proof_from_pcf_registry`** - Downloads proofs from PCF registry
 
 ### Monitoring and Logging
