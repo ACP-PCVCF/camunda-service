@@ -7,16 +7,16 @@
       <bpmn:extensionElements>
         <zeebe:calledElement processId="=subprocess_id" propagateAllChildVariables="false" propagateAllParentVariables="false" />
         <zeebe:ioMapping>
-          <zeebe:input source="=if product_footprints[3] != null then product_footprints[3] else if product_footprints[2] != null then product_footprints[2] else product_footprints[1]" target="previous_product_footprint" />
+          <zeebe:input source="=if proof_response_ids[3] != null then proof_response_ids[3] else if proof_response_ids[2] != null then proof_response_ids[2] else proof_response_ids[1]" target="previous_product_footprint_id" />
           <zeebe:input source="=shipment_information" target="shipment_information" />
-          <zeebe:output source="=product_footprint" target="intstance_scf" />
+          <zeebe:output source="=proof_response_id" target="intstance_scf" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0zvkgzy</bpmn:incoming>
       <bpmn:outgoing>Flow_1t4dit4</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics isSequential="true">
         <bpmn:extensionElements>
-          <zeebe:loopCharacteristics inputCollection="=subprocess_identifiers" inputElement="subprocess_id" outputCollection="product_footprints" outputElement="=product_footprint" />
+          <zeebe:loopCharacteristics inputCollection="=subprocess_identifiers" inputElement="subprocess_id" outputCollection="proof_response_ids" outputElement="=proof_response_id" />
         </bpmn:extensionElements>
       </bpmn:multiInstanceLoopCharacteristics>
     </bpmn:callActivity>
