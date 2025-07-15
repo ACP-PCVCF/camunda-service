@@ -15,7 +15,14 @@ def delivery_report(err, msg):
 
 
 def send_message_to_kafka(topic_name, message, bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS):
-    conf = {'bootstrap.servers': bootstrap_servers}
+    conf = {
+        'bootstrap.servers': bootstrap_servers,
+        'message.max.bytes': 52428800,
+        'receive.message.max.bytes': 52428800,
+        'compression.type': 'snappy',
+        'batch.size': 65536,
+        'linger.ms': 100
+    }
     producer = Producer(conf)
 
     try:
