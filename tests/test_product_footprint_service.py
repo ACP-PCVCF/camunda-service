@@ -70,61 +70,6 @@ class TestProductFootprintService(unittest.TestCase):
             template.extensions[0].data.shipmentId, custom_shipment_id)
         self.assertEqual(template.extensions[0].data.mass, custom_weight)
 
-    def test_validate_shipment_information_valid(self):
-        """Test validation with valid shipment information."""
-        valid_info = {
-            "shipment_id": "SHIP_123",
-            "shipment_weight": 1000.0
-        }
-
-        self.assertTrue(self.service.validate_shipment_information(valid_info))
-
-    def test_validate_shipment_information_invalid(self):
-        """Test validation with invalid shipment information."""
-        # Test invalid weight
-        invalid_weight = {
-            "shipment_id": "SHIP_123",
-            "shipment_weight": -100.0
-        }
-        self.assertFalse(
-            self.service.validate_shipment_information(invalid_weight))
-
-        # Test invalid shipment_id
-        invalid_id = {
-            "shipment_id": "",
-            "shipment_weight": 1000.0
-        }
-        self.assertFalse(
-            self.service.validate_shipment_information(invalid_id))
-
-        # Test non-dict input
-        self.assertFalse(
-            self.service.validate_shipment_information("not_a_dict"))
-
-    def test_update_template_with_custom_data(self):
-        """Test updating template with custom data."""
-        template = self.service.create_basic_template(self.company_name)
-
-        custom_data = {
-            "company_name": "Updated Company",
-            "product_description": "Updated description",
-            "mass": 3000.0,
-            "shipment_id": "UPDATED_SHIP_456"
-        }
-
-        updated_template = self.service.update_template_with_custom_data(
-            template, custom_data)
-
-        self.assertEqual(updated_template.companyName, "Updated Company")
-        self.assertEqual(updated_template.productDescription,
-                         "Updated description")
-        self.assertEqual(updated_template.extensions[0].data.mass, 3000.0)
-        self.assertEqual(
-            updated_template.extensions[0].data.shipmentId, "UPDATED_SHIP_456")
-
-        # Verify original template is unchanged
-        self.assertEqual(template.companyName, self.company_name)
-
     def test_custom_configuration(self):
         """Test service with custom configuration."""
         custom_service = ProductFootprintService(

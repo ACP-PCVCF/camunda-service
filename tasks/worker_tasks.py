@@ -14,6 +14,7 @@ from services.sensor_data_service import SensorDataService
 from services.proving_service import ProofingService
 from services.product_footprint import ProductFootprintService
 from services.logistics_operation_service import LogisticsOperationService
+from services.pcf_registry_service import PCFRegistryService
 
 
 class CamundaWorkerTasks:
@@ -29,8 +30,8 @@ class CamundaWorkerTasks:
         self.product_footprint_service = ProductFootprintService()
         self.logistics_operation_service = LogisticsOperationService(
             self.sensor_data_service)
+        self.pcf_registry_service = PCFRegistryService()
 
-        # Register all tasks
         self._register_tasks()
 
     def _register_tasks(self):
@@ -57,31 +58,56 @@ class CamundaWorkerTasks:
                          exception_handler=on_error)(self.verify_receipt)
         self.worker.task(task_type="consume_proof_response",
                          exception_handler=on_error, timeout_ms=600000)(self.consume_proof_response)
+        self.worker.task(task_type="get_proof_from_pcf_registry",
+                         exception_handler=on_error)(self.get_proof_from_pcf_registry)
+
+    def get_proof_from_pcf_registry(self, previous_product_footprint_id) -> dict:
+        log_task_start("get_proof_from_pcf_registry")
+
+        if previous_product_footprint_id is None:
+            print("No previous product footprint ID provided")
+            log_task_completion("get_proof_from_pcf_registry")
+            return {"get_proof_success": "False"}
+
+        proof_response_id = previous_product_footprint_id["proof_response_id"]
+        print(f"Downloading proof response with ID: {proof_response_id}")
+
+        proof_response = self.pcf_registry_service.download_proof_response(
+            proof_response_id)
+
+        if proof_response:
+            proof_response_path = "data/proof_documents_examples/proof_response.json"
+            try:
+                os.makedirs(os.path.dirname(
+                    proof_response_path), exist_ok=True)
+
+                with open(proof_response_path, 'w', encoding='utf-8') as f:
+                    f.write(proof_response)
+                print(f"Proof response saved to: {proof_response_path}")
+                log_task_completion(
+                    "get_proof_from_pcf_registry", saved_to=proof_response_path)
+                return {"get_proof_success": "False", "saved_to": proof_response_path}
+
+            except Exception as e:
+                print(f"Error saving proof response to file: {e}")
+                log_task_completion(
+                    "get_proof_from_pcf_registry", error=str(e))
+                return {"get_proof_success": "False", "error": str(e)}
+        else:
+            print(
+                f"Failed to download proof response with ID: {proof_response_id}")
+            log_task_completion("get_proof_from_pcf_registry")
+            return {"get_proof_success": "False"}
 
     def consume_proof_response(self) -> dict:
-        """
-        Consume proof response from the proofing service.
-
-        Returns:
-            Dictionary containing the proof response
-        """
         log_task_start("consume_proof_response")
 
-        result = self.proofing_service.receive_proof_response()
+        proof_response_id = self.proofing_service.receive_proof_response()
 
-        log_task_completion("consume_proof_response", **result)
-        return {"proof_response": result}
+        log_task_completion("consume_proof_response", **proof_response_id)
+        return {"proof_response_id": proof_response_id}
 
     async def verify_receipt(self) -> dict:
-        """
-        Verify the receipt using the ReceiptVerifier service.
-
-        Args:
-            proofing_document: Dictionary containing the proofing document to verify
-
-        Returns:
-            Dictionary containing the verification result
-        """
         log_task_start("verify_receipt")
 
         receipt_verifier = self.receipt_verifier_service
@@ -91,15 +117,6 @@ class CamundaWorkerTasks:
         return {"verification_result": result}
 
     def collect_hoc_toc_data(self, product_footprint: dict, sensor_data: Optional[list[dict]] = None) -> dict:
-        """
-        Collect HOC and TOC data based on product footprint.
-        Args:
-            product_footprint: Product footprint data
-            sensor_data: Optional sensor data to include in the proofing document
-        Returns:
-            Dictionary containing the proofing document with HOC and TOC data
-        """
-
         log_task_start("collect_hoc_toc_data")
         result = self.hoc_toc_service.collect_hoc_toc_data(
             product_footprint, sensor_data)
@@ -108,18 +125,6 @@ class CamundaWorkerTasks:
         return result
 
     def transport_procedure(self, tocId: int, product_footprint: dict, job: Job, sensor_data: Optional[list[dict]] = None) -> dict:
-        """
-        Handle the transport procedure for a given tocId and product footprint using LogisticsOperationService.
-
-        Args:
-            tocId: Unique identifier for the transport operation category (toc)
-            job: Zeebe Job instance containing process instance and element ID
-            product_footprint: Product footprint data
-            sensor_data: Optional list of previous sensor data dictionaries to append to
-
-        Returns:
-            product_footprint with tocId Information
-        """
         log_task_start("transport_procedure")
 
         result = self.logistics_operation_service.execute_transport_procedure(
@@ -129,19 +134,6 @@ class CamundaWorkerTasks:
         return result
 
     def hub_procedure(self, hocId: str, product_footprint: dict) -> dict:
-        """
-        Handle the hub procedure for a given hocId and product footprint using LogisticsOperationService.
-
-        Args:
-            hocId: Unique identifier for the hub operation category (hoc)
-            product_footprint: Product footprint data
-
-        Returns:
-            product_footprint with hocId Information
-        """
-        log_task_start("hub_procedure")
-
-        # Use the logistics operation service to handle the hub procedure
         result = self.logistics_operation_service.execute_hub_procedure(
             hocId, product_footprint)
 
@@ -149,19 +141,6 @@ class CamundaWorkerTasks:
         return result
 
     def define_product_footprint_template(self, company_name: str, shipment_information: dict) -> dict:
-        """
-        Define a product footprint template using the ProductFootprintService.
-
-        Args:
-            company_name: Name of the company creating the footprint
-            shipment_information: Dictionary containing shipment details
-
-        Returns:
-            Dictionary containing the product footprint
-        """
-        log_task_start("define_product_footprint_template")
-
-        # Use the product footprint service to create the template
         result = self.product_footprint_service.create_product_footprint_template(
             company_name, shipment_information)
 
@@ -169,12 +148,6 @@ class CamundaWorkerTasks:
         return result
 
     def determine_job_sequence(self):
-        """
-        Determine which subprocesses should be executed.
-
-        Returns:
-            Dictionary containing the list of subprocess identifiers
-        """
         log_task_start("determine_job_sequence")
 
         subprocesses = [
@@ -188,18 +161,9 @@ class CamundaWorkerTasks:
         return result
 
     def send_to_proofing_service(self, proofing_document: dict) -> dict:
-        """
-        Send proofing document to the proofing service.
-
-        Args:
-            proofing_document: Dictionary containing the proofing document
-
-        Returns:
-            Dictionary containing the proof response
-        """
         log_task_start("send_to_proofing_service")
 
-        result = self.proofing_service.send_proofing_document(
+        self.proofing_service.send_proofing_document(
             proofing_document)
 
         log_task_completion("send_to_proofing_service")
@@ -207,13 +171,6 @@ class CamundaWorkerTasks:
         return {"proof_send_status": "send_successful"}
 
     async def notify_next_node(self, message_name: str, shipment_information: dict) -> None:
-        """
-        Publish a message to notify the next node in the process.
-
-        Args:
-            message_name: Name of the message to publish
-            shipment_information: Information about shipment and weight
-        """
         log_task_start("notify_next_node",
                        message_name=message_name, shipment_information=shipment_information)
 
@@ -232,14 +189,6 @@ class CamundaWorkerTasks:
             message_name: str,
             product_footprints: dict,
     ):
-        """
-        Send data back to the origin process.
-
-        Args:
-            shipment_information: Information about shipment and weight
-            message_name: Name of the message to publish
-            tce_data: Tce data to include in the message
-        """
         log_task_start("send_data_to_origin",
                        shipment_information=shipment_information, message_name=message_name)
 
@@ -255,23 +204,7 @@ class CamundaWorkerTasks:
         log_task_completion("send_data_to_origin")
 
     def set_shipment_information(self):
-        """
-        Generate a new shipment ID.
-        And weight for the shipment.
-
-        Returns:
-            Dictionary containing the new shipment ID and weight
-        """
         log_task_start("set_shipment_information")
-
-        # Delete proof_response.json file if it exists
-        proof_response_path = "data/proof_documents_examples/proof_response.json"
-        try:
-            if os.path.exists(proof_response_path):
-                os.remove(proof_response_path)
-                print(f"Deleted {proof_response_path}")
-        except OSError as e:
-            print(f"Error deleting {proof_response_path}: {e}")
 
         shipment_id = f"SHIP_{uuid.uuid4()}"
         weight = random.uniform(1000, 20000)
