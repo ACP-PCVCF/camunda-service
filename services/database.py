@@ -13,18 +13,15 @@ from models.logistics_operations import HocData, TocData
 class HocTocService:
     def __init__(self):
         self.db = HocTocDatabase()
-        # One-time setup: populate database if empty
         self._populate_database_if_needed()
 
     def _populate_database_if_needed(self):
-        """Populate database from mock data if it's empty."""
         # Check if database has data
         test_data = self.get_hoc_data("100")
         if test_data is None:
             self.db.populate_from_mock_data(get_mock_data)
 
     def get_hoc_data(self, hoc_id: str) -> Optional[Dict[str, Any]]:
-        """Get HOC data by ID."""
         conn = sqlite3.connect(self.db.db_path)
         cursor = conn.cursor()
 
@@ -44,7 +41,6 @@ class HocTocService:
         return None
 
     def get_toc_data(self, toc_id: str) -> Optional[Dict[str, Any]]:
-        """Get TOC data by ID."""
         conn = sqlite3.connect(self.db.db_path)
         cursor = conn.cursor()
 
@@ -72,7 +68,6 @@ class HocTocService:
         return None
 
     def get_transport_data(self, id: str) -> Optional[Dict[str, Any]]:
-        """Get data from database by ID, checking HOC and TOC tables."""
 
         data = self.get_hoc_data(id)
         if data:
@@ -85,7 +80,6 @@ class HocTocService:
         return None
 
     def collect_hoc_toc_data(self, product_footprint: dict, sensor_data: Optional[list[dict]] = None) -> dict:
-        """Collect HOC and TOC data based on product footprint and return a proofing document."""
         product_footprint_verified = ProductFootprint.model_validate(
             product_footprint)
         proofingDocument = ProofingDocument(
