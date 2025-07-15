@@ -22,6 +22,7 @@ class ProofingService:
         proofing_document_verified = ProofingDocument.model_validate(
             proofing_document)
 
+        # This is the proof response which we download from the PCF registry earlier
         if os.path.exists("data/proof_documents_examples/proof_response.json"):
             with open("data/proof_documents_examples/proof_response.json", "r") as f:
                 data = json.load(f)
