@@ -86,7 +86,7 @@ class CamundaWorkerTasks:
                 print(f"Proof response saved to: {proof_response_path}")
                 log_task_completion(
                     "get_proof_from_pcf_registry", saved_to=proof_response_path)
-                return {"get_proof_success": "False", "saved_to": proof_response_path}
+                return {"get_proof_success": "True"}
 
             except Exception as e:
                 print(f"Error saving proof response to file: {e}")
