@@ -1,8 +1,8 @@
 import random
 import uuid
-from typing import Optional
 import os
 
+from typing import Optional
 from pyzeebe import ZeebeWorker, ZeebeClient, Job
 
 from utils.error_handling import on_error
