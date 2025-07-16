@@ -182,26 +182,4 @@ Run the tests using:
 
 ```bash
 python -m unittest discover tests
-```
-
-Current test coverage includes:
-- Product footprint service validation
-- Kafka messaging functionality
-- Service verification workflows
-
-### Docker and Kubernetes
-
-The service is containerized and ready for Kubernetes deployment:
-
-- **Dockerfile**: Multi-stage build with Python 3.12-slim base
-- **Kubernetes Manifest**: Includes init containers for Zeebe dependency checks
-- **Environment Configuration**: Supports environment-based configuration for different deployment targets
-
-### Dependencies
-
-Key dependencies include:
-- **pyzeebe**: Zeebe client and worker framework
-- **confluent-kafka**: Kafka messaging integration
-- **grpcio**: gRPC communication for external services
-- **pydantic**: Data validation and serialization
-- **cryptography**: Security and encryption support
+``` 

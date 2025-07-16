@@ -1,6 +1,7 @@
 import uuid
 import datetime
 import random
+
 from typing import Dict, Any, Optional
 from models.product_footprint import ProductFootprint, Extension, ExtensionData
 from utils.logging_utils import log_service_call
