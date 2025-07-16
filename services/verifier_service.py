@@ -33,7 +33,7 @@ class ReceiptVerifierService():
         async with aio.insecure_channel(server_addr) as channel:
             client = receipt_verifier_pb2_grpc.ReceiptVerifierServiceStub(
                 channel)
-            print(f"Verbunden mit gRPC Server auf {server_addr}")
+            print(f"Connected to gRPC server: {server_addr}")
 
             # This is the proof response which we download from the PCF registry earlier
             if os.path.exists("data/proof_documents_examples/proof_response.json"):
@@ -47,12 +47,12 @@ class ReceiptVerifierService():
                     chunk_stream = self.__read_data_chunks(
                         json.dumps(verifier_data))
 
-                    print("Starte Stream zum Server...")
+                    print("Start stream...")
 
                     try:
                         response = await client.VerifyReceiptStream(chunk_stream)
 
-                        print("gRPC Antwort erhalten:")
+                        print("gRPC response received:")
                         print(f"  Valid: {response.valid}")
                         print(f"  Message: {response.message}")
 
@@ -62,7 +62,7 @@ class ReceiptVerifierService():
                             print(f"  Journal Value: {response.journal_value}")
 
                     except grpc.RpcError as e:
-                        print(f"gRPC Fehler: {e.code()}: {e.details()}")
+                        print(f"Error gRPC: {e.code()}: {e.details()}")
 
                     return message
 
