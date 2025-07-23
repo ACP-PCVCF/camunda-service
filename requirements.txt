@@ -5,4 +5,4 @@ pydantic>=2.0.0
 confluent-kafka>=2.10.0
 grpcio>=1.60.0,<2.0.0
 grpcio-tools>=1.60.0,<2.0.0
-protobuf>=5.26.1,<6.0.0
+protobuf==4.25.5
