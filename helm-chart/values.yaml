@@ -1,0 +1,28 @@
+image:
+  registry: "ghcr.io/acp-pcvcf"
+  repository: "camunda-service"
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  name: camunda-service
+  port: 8000
+  targetPort: 8000
+
+deployment:
+  name: camunda-service
+  replicas: 1
+  containerPort: 8000
+
+environment:
+  zeebeAddress: "camunda-zeebe-gateway:26500"
+  proofingServiceApiUrl: "http://proofing-service:3000"
+  sensorServiceApiUrl: "http://sensor-data-service:8080"
+  verifierServiceApiUrl: "verifier-service.verifier-system.svc.cluster.local:80"
+  pcfRegistryServerAddress: "pcf-registry-service.proving-system.svc.cluster.local:50052"
+  kafkaBootstrapServers: "kafka.proving-system.svc.cluster.local:9092"
+  logLevel: "INFO"
+  activitiesOutputPath: "/app/activities.json"
+  requestTimeout: "30"
+
+namespace: proving-system

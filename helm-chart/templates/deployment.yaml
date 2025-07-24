@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deployment.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deployment.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deployment.name }}
+    spec:
+      initContainers:
+        - name: wait-for-zeebe
+          image: busybox
+          command: ['sh', '-c', 'until nc -z camunda-zeebe-gateway 26500; do echo waiting for Zeebe...; sleep 2; done']
+      containers:
+      - name: camunda-service
+        image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+         - containerPort: {{ .Values.deployment.containerPort }}
+        env:
+        - name: ZEEBE_ADDRESS
+          value: "{{ .Values.environment.zeebeAddress }}"
+        - name: PROOFING_SERVICE_API_URL
+          value: "{{ .Values.environment.proofingServiceApiUrl }}"
+        - name: SENSOR_SERVICE_API_URL
+          value: "{{ .Values.environment.sensorServiceApiUrl }}"
+        - name: VERIFIER_SERVICE_API_URL
+          value: "{{ .Values.environment.verifierServiceApiUrl }}"
+        - name: PCF_REGISTRY_SERVER_ADDRESS
+          value: "{{ .Values.environment.pcfRegistryServerAddress }}"
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "{{ .Values.environment.kafkaBootstrapServers }}"
+        - name: LOG_LEVEL
+          value: "{{ .Values.environment.logLevel }}"
+        - name: ACTIVITIES_OUTPUT_PATH
+          value: "{{ .Values.environment.activitiesOutputPath }}"
+        - name: REQUEST_TIMEOUT
+          value: "{{ .Values.environment.requestTimeout }}"
