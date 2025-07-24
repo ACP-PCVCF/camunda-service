@@ -19,8 +19,8 @@ spec:
             command: ['sh', '-c', 'until nc -z camunda-zeebe-gateway 26500; do echo waiting for Zeebe...; sleep 2; done']
       containers:
       - name: camunda-service
-        image: camunda-service:latest
-        imagePullPolicy: IfNotPresent
+        image: ghcr.io/acp-pcvcf/camunda-service:latest
+        imagePullPolicy: Always
         ports:
          - containerPort: 8000
         env:
