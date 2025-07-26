@@ -1,6 +1,5 @@
 import random
 import uuid
-import os
 
 from typing import Optional
 from pyzeebe import ZeebeWorker, ZeebeClient, Job
@@ -8,6 +7,7 @@ from pyzeebe import ZeebeWorker, ZeebeClient, Job
 from utils.error_handling import on_error
 from utils.logging_utils import log_task_start, log_task_completion
 
+from models.proofing_document import ProofResponse, ProofingDocument
 from services.database import HocTocService
 from services.verifier_service import ReceiptVerifierService
 from services.sensor_data_service import SensorDataService
@@ -69,49 +69,75 @@ class CamundaWorkerTasks:
             log_task_completion("get_proof_from_pcf_registry")
             return {"get_proof_success": "False"}
 
-        proof_response_id = previous_product_footprint_id["proof_response_id"]
-        print(f"Downloading proof response with ID: {proof_response_id}")
-
+        proof_response_id = previous_product_footprint_id
         proof_response = self.pcf_registry_service.download_proof_response(
             proof_response_id)
 
-        if proof_response:
-            proof_response_path = "data/proof_documents_examples/proof_response.json"
-            try:
-                os.makedirs(os.path.dirname(
-                    proof_response_path), exist_ok=True)
+        proof_response = ProofResponse.model_validate_json(proof_response)
+        
+        intern_registry_id = f"intern_pcf_registry_{proof_response.productFootprintId}"
+        print(f"Uploading proofing document to internal PCF registry with ID: {intern_registry_id}")
+        
+        self.pcf_registry_service.upload_proofing_document(
+            intern_registry_id, proof_response)
+        
+        log_task_completion("get_proof_from_pcf_registry")
+        return {"get_proof_success": "True"}
 
-                with open(proof_response_path, 'w', encoding='utf-8') as f:
-                    f.write(proof_response)
-                print(f"Proof response saved to: {proof_response_path}")
-                log_task_completion(
-                    "get_proof_from_pcf_registry", saved_to=proof_response_path)
-                return {"get_proof_success": "True"}
-
-            except Exception as e:
-                print(f"Error saving proof response to file: {e}")
-                log_task_completion(
-                    "get_proof_from_pcf_registry", error=str(e))
-                return {"get_proof_success": "False", "error": str(e)}
-        else:
-            print(
-                f"Failed to download proof response with ID: {proof_response_id}")
-            log_task_completion("get_proof_from_pcf_registry")
-            return {"get_proof_success": "False"}
-
-    def consume_proof_response(self) -> dict:
+    def consume_proof_response(self, proofing_document: dict) -> dict:
         log_task_start("consume_proof_response")
 
-        proof_response_id = self.proofing_service.receive_proof_response()
+        proof_response = self.proofing_service.receive_proof_response() 
 
-        log_task_completion("consume_proof_response", **proof_response_id)
-        return {"proof_response_id": proof_response_id}
+        # Validate and append the proof response to the proofing document
+        proofing_document = ProofingDocument.model_validate(proofing_document)
 
-    async def verify_receipt(self) -> dict:
+        # Set the proofReference to the productFootprintId of the proof response
+        proof_response.proofReference = proof_response.productFootprintId
+
+        # Set the pcf value in the proofing document
+        proofing_document.productFootprint.pcf = proof_response.pcf
+
+        proofing_document.proof.append(proof_response)
+        updated_proofing_document = proofing_document.model_dump()
+
+        # Save to file
+        import json
+        import os
+        file_path = "data/proof_documents_examples/proof_response.json"
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        
+        with open(file_path, 'w') as f:
+            json.dump(updated_proofing_document, f, indent=2)
+        print(f"Saved updated proofing document to: {file_path}")
+
+        log_task_completion("consume_proof_response")
+        return {
+            "proofing_document": updated_proofing_document,
+            "proof_response_id": proof_response.productFootprintId
+        }
+
+    async def verify_receipt(self, previous_product_footprint_id) -> dict:
         log_task_start("verify_receipt")
 
-        receipt_verifier = self.receipt_verifier_service
-        result = await receipt_verifier.VerifyReceiptStream()
+        if previous_product_footprint_id is None:
+            print("No previous product footprint ID provided")
+            log_task_completion("verify_receipt")
+            return {"verification_result": "No previous product footprint ID provided"}
+
+        proof_response_id = previous_product_footprint_id
+        intern_registry_id = f"intern_pcf_registry_{proof_response_id}"
+        print(f"Downloading proof response from internal pcf registry with ID: {intern_registry_id}")
+
+        proof_response_content = self.pcf_registry_service.download_proof_response(intern_registry_id)
+
+        if not proof_response_content:
+            print("Failed to download proof response from internal registry")
+            log_task_completion("verify_receipt")
+            return {"verification_result": "Failed to download proof response from internal registry"}
+
+        proof_response_obj = ProofResponse.model_validate_json(proof_response_content)
+        result = await self.receipt_verifier_service.VerifyReceiptStream(proof_response=proof_response_obj)
 
         log_task_completion("verify_receipt")
         return {"verification_result": result}
@@ -160,11 +186,30 @@ class CamundaWorkerTasks:
         log_task_completion("determine_job_sequence", **result)
         return result
 
-    def send_to_proofing_service(self, proofing_document: dict) -> dict:
+    def send_to_proofing_service(self, proofing_document: dict, previous_product_footprint_id) -> dict:
         log_task_start("send_to_proofing_service")
 
+        if previous_product_footprint_id is None:
+            print("No previous product footprint ID provided, sending proofing document without inner proof")
+            self.proofing_service.send_proofing_document(proofing_document, None)
+            log_task_completion("send_to_proofing_service")
+            return {"proof_send_status": "send_successful"}
+
+        proof_response_id = previous_product_footprint_id
+        intern_registry_id = f"intern_pcf_registry_{proof_response_id}"
+        print(f"Downloading proof response from internal pcf registry with ID: {intern_registry_id}")
+
+        proof_response_content = self.pcf_registry_service.download_proof_response(intern_registry_id)
+
+        if not proof_response_content:
+            print("Failed to download proof response from internal registry")
+            log_task_completion("send_to_proofing_service")
+            return {"proof_send_status": "Failed to download proof response from internal registry"}
+
+        proof_response_obj = ProofResponse.model_validate_json(proof_response_content)
+
         self.proofing_service.send_proofing_document(
-            proofing_document)
+            proofing_document, proof_response_obj)
 
         log_task_completion("send_to_proofing_service")
 

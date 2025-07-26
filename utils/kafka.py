@@ -11,7 +11,7 @@ def delivery_report(err, msg):
     if err is not None:
         print(f"Message delivery failed: {err}")
     else:
-        print(f"Message delivered to {msg.topic()} [{msg.partition()}]")
+        print(f"Kafka message delivered successfully to topic '{msg.topic()}' [partition {msg.partition()}]")
 
 
 def send_message_to_kafka(topic_name, message, bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS):
@@ -64,8 +64,6 @@ def consume_messages_from_kafka(topic_name, bootstrap_servers=KAFKA_BOOTSTRAP_SE
                 # Message successfully received
                 print(
                     f"Received message from Kafka: Topic={msg.topic()}, Partition={msg.partition()}, Offset={msg.offset()}")
-                print(
-                    f"Key: {msg.key().decode('utf-8') if msg.key() else 'N/A'}")
                 consumer.commit(asynchronous=False)
                 return msg.value().decode('utf-8')
 

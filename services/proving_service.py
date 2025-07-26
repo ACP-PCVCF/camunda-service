@@ -16,33 +16,27 @@ class ProofingService:
         self.topic_in = topic_in
         self.pcf_registry_service = PCFRegistryService()
 
-    def send_proofing_document(self, proofing_document: Dict[str, Any]) -> Dict[str, Any]:
+    def send_proofing_document(self, proofing_document: Dict[str, Any], proof_response_obj: ProofResponse) -> Dict[str, Any]:
         log_service_call("ProofingService", "send_proofing_document")
-        print("Sending proofing document to Kafka...")
 
         proofing_document_verified = ProofingDocument.model_validate(
             proofing_document)
 
-        # This is the proof response which we download from the PCF registry earlier
-        if os.path.exists("data/proof_documents_examples/proof_response.json"):
-            with open("data/proof_documents_examples/proof_response.json", "r") as f:
-                data = json.load(f)
-                data = ProofResponse.model_validate(data)
-                proofing_document_verified.proof.append(data)
-                print(proofing_document_verified.proof[0].productFootprintId)
+        if proof_response_obj is not None:
+            proofing_document_verified.proof.append(proof_response_obj)
+            print(f"Added inner proof with id: {proofing_document_verified.proof[0].productFootprintId} for current Proofing Document ID: {proofing_document_verified.productFootprint.id}")
 
-        print("Proofing document verified and ready to send.")
+        print("Sending proofing document to Kafka...")
 
         message_to_send = proofing_document_verified.model_dump_json()
-
         send_message_to_kafka(self.topic_out, message_to_send)
 
         print("Message sent to Kafka topic.")
 
-    def receive_proof_response(self) -> Dict[str, str]:
+    def receive_proof_response(self) -> ProofResponse:
         response_message = consume_messages_from_kafka(self.topic_in)
         proof_response = ProofResponse.model_validate_json(response_message)
         self.pcf_registry_service.upload_proofing_document(
             proof_response.productFootprintId, proof_response)
 
-        return {"proof_response_id": proof_response.productFootprintId}
+        return proof_response

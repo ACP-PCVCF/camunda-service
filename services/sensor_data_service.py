@@ -10,7 +10,6 @@ class SensorDataService:
     """Service for retrieving and generating transport emission data."""
 
     def __init__(self):
-        log_service_call("SensorDataService", "__init__")
         self.base_url = SENSOR_DATA_SERVICE_URL
 
     def call_service_sensordata(self, variables) -> TceSensorData:

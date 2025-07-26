@@ -20,14 +20,13 @@ class PCFRegistryService:
 
     def download_proof_response(self, object_id: str) -> Optional[str]:
         log_service_call("PCFRegistryService", "download_proof_response")
-
-        print(f"Downloading proof response file: {object_id}")
-        print(f"Using PCF Registry server address: {self.server_address}")
+        print(f"Downloading proof response with ID: {object_id}")
 
         try:
             with grpc.insecure_channel(self.server_address) as channel:
                 stub = json_streaming_pb2_grpc.JsonStreamingServiceStub(
                     channel)
+                print(f"Connected to gRPC server: {self.server_address}")
 
                 request = json_streaming_pb2.GetRequest(message=object_id)
 
@@ -42,13 +41,11 @@ class PCFRegistryService:
                     content = f.read()
                 os.unlink(temp_path)
 
-                print(
-                    f"Successfully downloaded proof response file: {object_id}")
+                print(f"Successfully downloaded proof response file: {object_id}")
                 return content
 
         except grpc.RpcError as e:
-            print(
-                f"gRPC error occurred during download: {e.code()} - {e.details()}")
+            print(f"gRPC error occurred during download: {e.code()} - {e.details()}")
             return None
         except Exception as e:
             print(f"Error downloading proof response file: {e}")
@@ -75,9 +72,6 @@ class PCFRegistryService:
             print("Warning: gRPC proto files not available, cannot upload")
             return False
 
-        print(f"Uploading proof response file: {object_name}")
-        print(f"Using PCF Registry server address: {self.server_address}")
-
         try:
             with grpc.insecure_channel(self.server_address) as channel:
                 stub = json_streaming_pb2_grpc.JsonStreamingServiceStub(
@@ -90,17 +84,14 @@ class PCFRegistryService:
                 response = stub.UploadJson(chunk_generator, metadata=metadata)
 
                 if response.success:
-                    print(
-                        f"Successfully uploaded proof response file: {object_name}")
-                    print(f"Server message: {response.message}")
+                    print(f"PCF Registry response: {response.message}")
                     return True
                 else:
-                    print(f"Upload failed: {response.message}")
+                    print(f"PCF Registry response: {response.message}")
                     return False
 
         except grpc.RpcError as e:
-            print(
-                f"gRPC error occurred during upload: {e.code()} - {e.details()}")
+            print(f"gRPC error occurred during upload: {e.code()} - {e.details()}")
             return False
         except Exception as e:
             print(f"Error uploading proof response file: {e}")
@@ -124,7 +115,6 @@ class PCFRegistryService:
     def upload_proofing_document(self, object_name: str, proofing_document: ProofingDocument) -> bool:
         try:
             json_content = proofing_document.model_dump_json(indent=2)
-
             return self.upload_proof_response(object_name, json_content)
 
         except Exception as e:
