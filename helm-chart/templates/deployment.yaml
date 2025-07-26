@@ -25,17 +25,17 @@ spec:
          - containerPort: {{ .Values.deployment.containerPort }}
         env:
         - name: ZEEBE_ADDRESS
-          value: "{{ .Values.environment.zeebeAddress }}"
+          value: "{{ .Values.environment.zeebe.host }}:{{ .Values.environment.zeebe.port }}"
         - name: PROOFING_SERVICE_API_URL
-          value: "{{ .Values.environment.proofingServiceApiUrl }}"
+          value: "http://{{ .Values.environment.proofingService.host }}:{{ .Values.environment.proofingService.port }}"
         - name: SENSOR_SERVICE_API_URL
-          value: "{{ .Values.environment.sensorServiceApiUrl }}"
+          value: "http://{{ .Values.environment.sensorService.host }}:{{ .Values.environment.sensorService.port }}"
         - name: VERIFIER_SERVICE_API_URL
-          value: "{{ .Values.environment.verifierServiceApiUrl }}"
+          value: "{{ .Values.environment.verifierService.host }}:{{ .Values.environment.verifierService.port }}"
         - name: PCF_REGISTRY_SERVER_ADDRESS
-          value: "{{ .Values.environment.pcfRegistryServerAddress }}"
+          value: "{{ .Values.environment.pcfRegistryServer.host }}:{{ .Values.environment.pcfRegistryServer.port }}"
         - name: KAFKA_BOOTSTRAP_SERVERS
-          value: "{{ .Values.environment.kafkaBootstrapServers }}"
+          value: "{{ .Values.environment.kafka.host }}:{{ .Values.environment.kafka.port }}"
         - name: LOG_LEVEL
           value: "{{ .Values.environment.logLevel }}"
         - name: ACTIVITIES_OUTPUT_PATH
