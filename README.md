@@ -1,134 +1,73 @@
-# Camunda Service
+# Business Process Service (Camunda Service) for TRACE
 
-A Python-based microservice for handling Camunda/Zeebe workflow tasks in a transport carbon emission (TCE) tracking system. This service connects to a Zeebe workflow engine and orchestrates interactions with various external services for sensor data collection, PCF registry, receipt verification, and carbon footprint proofing.
+This repository contains the Business Process Service, a core component of the **TRACE (Trusted Real-time Assessment of Chained Emissions)** system. This Python-based microservice is responsible for orchestrating workflow processes for transport carbon tracking using the Camunda 8 Zeebe engine.
 
-## Overview
+## TRACE System Overview
 
-This service implements a worker that connects to Camunda 8 Zeebe engine and acts as an orchestrator for carbon footprint tracking workflows. It manages the complete lifecycle of transport emission tracking including:
+TRACE is a decentralized system for verifiable Product Carbon Footprint (PCF) tracking in logistics and supply chains. It leverages zero-knowledge proofs and cryptographic verification to ensure data integrity and privacy while enabling efficient aggregation of emission data. The system is built on established industry standards, including the **iLEAP** and **GLEC** frameworks.
 
-- **Workflow Orchestration**: Handles Zeebe workflow tasks for transport carbon emission tracking
-- **Data Integration**: Collects sensor data from transport operations
-- **Product Footprint Management**: Creates and manages Product Carbon Footprint templates
-- **Proof Generation**: Integrates with proofing services via Kafka messaging
-- **Receipt Verification**: Verifies transport receipts through gRPC services
-- **Registry Integration**: Interfaces with PCF registry for proof storage and retrieval
-- **Logistics Operations**: Manages hub and transport procedures with TCE data tracking
+For more information about the TRACE system, please see the main [TRACE repository](https://github.com/ACP-PCVCF/TRACE).
 
-## Architecture
+## Role in the TRACE Architecture
 
-The service is built around several core components:
+The Business Process Service acts as the central orchestrator in the TRACE architecture. It manages BPMN workflows, coordinates tasks, and integrates with all other system components, including:
 
-- **Worker Tasks** (`tasks/worker_tasks.py`): Zeebe task handlers
-- **Services Layer** (`services/`): Modular services for different functionalities
-- **Data Models** (`models/`): Pydantic models for data validation
-- **Configuration** (`config/`): Environment-based configuration management
-- **Utilities** (`utils/`): Logging, error handling, and Kafka utilities
+-   **[Proving Service](https://github.com/ACP-PCVCF/proving-service)**: Generates and verifies zero-knowledge proofs for carbon footprint calculations.
+-   **[Verifier Service](https://github.com/ACP-PCVCF/verifier)**: Independently verifies ZK proofs and digital signatures.
+-   **[Sensor Data Service](https://github.com/ACP-PCVCF/sensor-data-service)**: Simulates and provides signed sensor data.
+-   **[Sensor Key Registry](https://github.com/ACP-PCVCF/sensor-key-registry)**: Manages and validates RSA public keys for sensor authentication.
+-   **[PCF Registry](https://github.com/ACP-PCVCF/pcf-registry)**: Stores and manages PCF proofs.
 
-## Requirements
+## Key Features
 
-- Python 3.12+ (Docker uses 3.12-slim)
-- Zeebe Server (Camunda 8 Platform)
-- Dependencies listed in `requirements.txt`
+-   **Workflow Orchestration**: Manages Zeebe workflow tasks for comprehensive transport carbon emission tracking.
+-   **Data Integration**: Collects and processes sensor data from transport operations.
+-   **Product Footprint Management**: Creates and manages Product Carbon Footprint (PCF) templates.
+-   **Proof Generation**: Integrates with proofing service via Kafka messaging to generate carbon footprint proofs.
+-   **Receipt Verification**: Verifies proof receipts through gRPC-based service.
+-   **Registry Integration**: Interfaces with a PCF registry for proof storage and retrieval.
+-   **Logistics Operations**: Manages hub and transport procedures, including TCE data tracking.
 
-## Installation
+## Getting Started
 
-### Local Development
+### Prerequisites
 
-1. Clone this repository
-2. Create a virtual environment (recommended)
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-3. Install dependencies
-   ```bash
-   pip install -r requirements.txt
-   ```
+-   Python 3.12+ (Docker image uses `python:3.12-slim`)
+-   Zeebe Server (Camunda 8 Platform)
+-   Dependencies as listed in `requirements.txt`
 
-### Docker Deployment
+### Getting Started
 
-Build and run using Docker:
-```bash
-docker build -t camunda-service:latest .
-docker run -e ZEEBE_ADDRESS=your-zeebe-gateway:26500 camunda-service:latest
-```
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/ACP-PCVCF/camunda-service.git
+    cd camunda-service
+    ```
+2.  **Create and activate a virtual environment**:
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+    ```
+3.  **Install dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+4.  **To start the service, run the following command**:
+    ```bash
+    python main.py
+    ```
 
-### Kubernetes Deployment
-
-Deploy to Kubernetes using the provided manifest:
-```bash
-kubectl apply -f k8s/camunda-service.yaml
-```
-
-## Configuration
-
-Configure the service through environment variables or by editing `config/settings.py`:
-
-### Core Settings
-- `ZEEBE_ADDRESS`: Zeebe gateway address (default: `localhost:26500`)
-- `LOG_LEVEL`: Logging level (default: `INFO`)
-
-### External Services
-- `KAFKA_BOOTSTRAP_SERVERS`: Kafka bootstrap servers (default: `localhost:9092`)
-- `SENSOR_DATA_SERVICE_URL`: Sensor data service endpoint (default: `http://localhost:8000`)
-- `VERIFIER_SERVICE_API_URL`: Receipt verifier gRPC service (default: `localhost:50051`)
-- `PCF_REGISTRY_SERVER_ADDRESS`: PCF registry gRPC service (default: `localhost:50052`)
-
-### Additional Settings
-- `REQUEST_TIMEOUT`: Service request timeout in seconds (default: `30`)
-
-## Usage
-
-Start the service by running:
-
-```bash
-python main.py
-```
-
-The service will:
-
-1. Connect to the configured Zeebe gateway
-2. Initialize all service dependencies (database, Kafka, gRPC clients)
-3. Register task handlers for workflow orchestration
-4. Begin processing tasks from the workflow engine
-
-### Available Zeebe Tasks
-
-The service registers the following task handlers:
-
-1. **`determine_job_sequence`** - Determines workflow execution sequence
-2. **`send_to_proofing_service`** - Sends documents to proofing service via Kafka
-3. **`notify_next_node`** - Publishes messages to notify downstream workflow nodes
-4. **`send_data_to_origin`** - Returns processed data to workflow origin
-5. **`define_product_footprint_template`** - Creates PCF templates for shipments
-6. **`hub_procedure`** - Executes hub-based logistics operations
-7. **`transport_procedure`** - Handles transport logistics with sensor data integration
-8. **`set_shipment_information`** - Initializes shipment metadata
-9. **`collect_hoc_toc_data`** - Collects hub and transport data
-10. **`verify_receipt`** - Verifies proof receipts via gRPC
-11. **`consume_proof_response`** - Consumes proof responses from Kafka and uploads proofs to PCF registry
-12. **`get_proof_from_pcf_registry`** - Downloads proofs from PCF registry
-
-### Monitoring and Logging
-
-The service provides comprehensive logging for all operations. Logs are written to:
-- Console output (configurable log level)
-- Log files in `logs/camunda_service.log`
-
-### Development Scripts
-
-The repository includes helpful scripts in `data/scripts/`:
-- **`camunda_forward.sh`** - Sets up port forwarding for Camunda Platform services
-- **`camunda-service-rollout.sh`** - Automates Kubernetes deployment and rollout
+The service will connect to the configured Zeebe gateway, initialize all dependencies, register task handlers, and begin processing workflow tasks.
 
 ## Development
 
 ### Project Structure
 
 ```
-├── config/              # Configuration management
+├── config/              # Configuration
 ├── data/               # BPMN files, example data, and scripts
 ├── k8s/                # Kubernetes deployment manifests
+├── helm_chart/         # Helm chart files
 ├── logs/               # Application logs
 ├── models/             # Pydantic data models
 ├── services/           # Business logic services
@@ -138,48 +77,24 @@ The repository includes helpful scripts in `data/scripts/`:
 ├── tests/              # Unit tests
 ├── utils/              # Utility functions
 ├── main.py             # Application entry point
-├── Dockerfile          # Container definition
 └── requirements.txt    # Python dependencies
 ```
 
-### Adding New Tasks
-
-To add a new Zeebe task:
-
-1. Implement the task function in `tasks/worker_tasks.py`
-2. Register the task in the `_register_tasks` method with appropriate decorators
-3. Update your BPMN workflow to include the new task type
-4. Add any required service dependencies to the constructor
-
-Example:
-```python
-def _register_tasks(self):
-    self.worker.task(task_type="my_new_task",
-                     exception_handler=on_error)(self.my_new_task_handler)
-
-def my_new_task_handler(self, param1: str, param2: dict) -> dict:
-    log_task_start("my_new_task")
-    # Implementation here
-    log_task_completion("my_new_task")
-    return {"result": "success"}
-```
-
-### Service Development
-
-Services are organized in the `services/` directory with clear separation of concerns:
-
-- **Database Service** (`database.py`) - HOC/TOC data persistence
-- **Sensor Data Service** (`sensor_data_service.py`) - Transport sensor integration
-- **Product Footprint Service** (`product_footprint.py`) - PCF template management
-- **Proving Service** (`proving_service.py`) - Kafka-based proof messaging
-- **Verifier Service** (`verifier_service.py`) - gRPC receipt verification
-- **Logistics Operation Service** (`logistics_operation_service.py`) - Transport/hub operations
-- **PCF Registry Service** (`pcf_registry_service.py`) - Proof registry integration
-
 ### Testing
 
-Run the tests using:
+The project includes a suite of unit tests. To run all tests, use the provided test runner:
 
 ```bash
-python -m unittest discover tests
-``` 
+python tests/run_tests.py
+```
+
+### CI/CD Integration
+
+Tests are automatically executed as part of the CI/CD pipeline in GitHub Actions. The workflow is configured to:
+
+1.  Run all tests on every push to the `main` branch.
+2.  Build and push the Docker image only if all tests pass.
+3.  Push the Docker image to the GitHub Container Registry (ghcr.io).
+4.  Generate an artifact attestation for the Docker image.
+
+For the complete workflow configuration, see `.github/workflows/push-to-registry.yml`.
