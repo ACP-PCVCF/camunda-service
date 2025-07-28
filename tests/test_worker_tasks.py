@@ -68,7 +68,7 @@ class TestWorkerTasks(unittest.TestCase):
         result = self.worker_tasks.upload_proof_to_pcf_registry(proofing_document_dict)
 
         self.worker_tasks.pcf_registry_service.upload_proofing_document.assert_called_once_with(
-            "test-id", proofing_document.proof
+            "test-id", proofing_document.proof[-1]
         )
 
         expected_result = {
