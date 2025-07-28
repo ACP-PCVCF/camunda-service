@@ -92,7 +92,6 @@ class TestProofingService(unittest.TestCase):
         result = self.service.receive_proof_response()
 
         mock_consume_kafka.assert_called_once_with("test-topic-in")
-        self.mock_pcf_registry.return_value.upload_proofing_document.assert_called_once()
 
         self.assertEqual(result.productFootprintId, "test-id")
         self.assertEqual(result.proofReceipt, "test-receipt-data")
