@@ -1,6 +1,11 @@
+from typing import List, Optional
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
+
+from models.proofing_document import ProofingDocument, ProofResponse
+from models.product_footprint import TceData
+from models.logistics_operations import TocData, HocData
 
 
 def convert_sets_to_lists(obj):
@@ -254,3 +259,81 @@ def get_mock_data(id: str):
     }
 
     return mock_hoc_data.get(id, None)
+
+
+def calculate_pcf(proofing_document: ProofingDocument, previous_proofs: Optional[List[ProofResponse]] = None) -> float:
+
+    transport_pcf = 0.0
+
+    if previous_proofs:
+        for proof in previous_proofs:
+            transport_pcf += proof.pcf
+            print(f"Added PCF from previous proof: {proof.pcf} kg CO2e")
+
+    if not proofing_document.productFootprint.extensions:
+        print("No extensions found in product footprint")
+        return transport_pcf
+
+    ileap_extension = proofing_document.productFootprint.extensions[0]
+    tces = ileap_extension.data.tces
+
+    for tce in tces:
+        tce_emissions = 0.0
+
+        if tce.tocId:
+            emission_factor = get_toc_emission_factor(
+                proofing_document.tocData, tce.tocId)
+            if emission_factor and tce.distance and tce.distance.actual:
+                tce_emissions = tce.mass * emission_factor * tce.distance.actual
+                print(
+                    f"TOC TCE {tce.tceId}: {tce.mass} kg × {emission_factor} × {tce.distance.actual} km = {tce_emissions} kg CO2e")
+            else:
+                print(
+                    f"Missing data for TOC TCE {tce.tceId}: emission_factor={emission_factor}, distance={tce.distance}")
+
+        elif tce.hocId:
+            emission_factor = get_hoc_emission_factor(
+                proofing_document.hocData, tce.hocId)
+            if emission_factor:
+                tce_emissions = tce.mass * emission_factor
+                print(
+                    f"HOC TCE {tce.tceId}: {tce.mass} kg × {emission_factor} = {tce_emissions} kg CO2e")
+            else:
+                print(f"Missing emission factor for HOC TCE {tce.tceId}")
+
+        transport_pcf += tce_emissions
+
+    print(f"Total PCF: {transport_pcf} kg CO2e")
+    return transport_pcf
+
+
+def get_toc_emission_factor(toc_data: List[TocData], toc_id: str) -> Optional[float]:
+    for toc in toc_data:
+        if toc.tocId == toc_id:
+            emission_factor_str = toc.co2eIntensityWTW
+            try:
+                factor = float(emission_factor_str.split()[0])
+                return factor
+            except (ValueError, IndexError):
+                print(
+                    f"Error parsing emission factor for TOC {toc_id}: {emission_factor_str}")
+                return None
+
+    print(f"TOC {toc_id} not found in toc_data")
+    return None
+
+
+def get_hoc_emission_factor(hoc_data: List[HocData], hoc_id: str) -> Optional[float]:
+    for hoc in hoc_data:
+        if hoc.hocId == hoc_id:
+            emission_factor_str = hoc.co2eIntensityWTW
+            try:
+                factor = float(emission_factor_str.split()[0])
+                return factor
+            except (ValueError, IndexError):
+                print(
+                    f"Error parsing emission factor for HOC {hoc_id}: {emission_factor_str}")
+                return None
+
+    print(f"HOC {hoc_id} not found in hoc_data")
+    return None
