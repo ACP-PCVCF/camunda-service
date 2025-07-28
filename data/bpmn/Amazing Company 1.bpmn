@@ -107,33 +107,22 @@
         <bpmn:targetRef>Property_08z95io</bpmn:targetRef>
       </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
-    <bpmn:task id="Activity_0nbxy9n" name="Save Proving Document in Database">
-      <bpmn:incoming>Flow_09gyovx</bpmn:incoming>
-      <bpmn:outgoing>Flow_08hbjuh</bpmn:outgoing>
-    </bpmn:task>
     <bpmn:exclusiveGateway id="Gateway_1h2dgpy" name="Hide TCE data?" default="Flow_1xaw94y">
       <bpmn:incoming>Flow_103gmz8</bpmn:incoming>
       <bpmn:outgoing>Flow_0ffpqu5</bpmn:outgoing>
       <bpmn:outgoing>Flow_1xaw94y</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:task id="Activity_0nte1al" name="Calculate SCF Value">
-      <bpmn:incoming>Flow_0ffpqu5</bpmn:incoming>
-      <bpmn:outgoing>Flow_0iry91v</bpmn:outgoing>
-    </bpmn:task>
     <bpmn:exclusiveGateway id="Gateway_1qcy82f">
       <bpmn:incoming>Flow_0iry91v</bpmn:incoming>
       <bpmn:incoming>Flow_1hcpzt4</bpmn:incoming>
       <bpmn:outgoing>Flow_09gyovx</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:serviceTask id="Activity_16a69um" name="Consume Proof Response">
+    <bpmn:serviceTask id="Activity_16a69um" name="Receive Proof Response">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="consume_proof_response" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_00bns8o</bpmn:incoming>
       <bpmn:outgoing>Flow_1hcpzt4</bpmn:outgoing>
-      <bpmn:dataOutputAssociation id="DataOutputAssociation_16ij9on">
-        <bpmn:targetRef>DataStoreReference_01awtpm</bpmn:targetRef>
-      </bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Activity_0zeaidk" name="Get proof from PCF Registry">
       <bpmn:extensionElements>
@@ -174,6 +163,20 @@
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0iry91v" sourceRef="Activity_0nte1al" targetRef="Gateway_1qcy82f" />
     <bpmn:sequenceFlow id="Flow_1hcpzt4" sourceRef="Activity_16a69um" targetRef="Gateway_1qcy82f" />
+    <bpmn:serviceTask id="Activity_0nbxy9n" name="Upload Proof to PCF Registry">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="upload_proof_to_pcf_registry" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_09gyovx</bpmn:incoming>
+      <bpmn:outgoing>Flow_08hbjuh</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_169iv7n">
+        <bpmn:targetRef>DataStoreReference_01awtpm</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:task id="Activity_0nte1al" name="Calculate SCF Value">
+      <bpmn:incoming>Flow_0ffpqu5</bpmn:incoming>
+      <bpmn:outgoing>Flow_0iry91v</bpmn:outgoing>
+    </bpmn:task>
   </bpmn:process>
   <bpmn:process id="Process_15brhx2" isExecutable="false">
     <bpmn:startEvent id="Event_1mu0du2">
@@ -260,25 +263,18 @@
       <bpmndi:BPMNShape id="Activity_1afq8u0_di" bpmnElement="Activity_0cbhr5w">
         <dc:Bounds x="760" y="310" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0nbxy9n_di" bpmnElement="Activity_0nbxy9n">
-        <dc:Bounds x="2570" y="140" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1h2dgpy_di" bpmnElement="Gateway_1h2dgpy" isMarkerVisible="true">
         <dc:Bounds x="1935" y="155" width="50" height="50" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1920" y="131" width="79" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0nte1al_di" bpmnElement="Activity_0nte1al">
-        <dc:Bounds x="1910" y="330" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1qcy82f_di" bpmnElement="Gateway_1qcy82f" isMarkerVisible="true">
         <dc:Bounds x="2395" y="155" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_04l3zla_di" bpmnElement="Activity_16a69um">
         <dc:Bounds x="2270" y="140" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1kdaoil_di" bpmnElement="Activity_0zeaidk">
         <dc:Bounds x="570" y="310" width="100" height="80" />
@@ -288,6 +284,13 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1609" y="642" width="63" height="27" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_05kugws_di" bpmnElement="Activity_0nbxy9n">
+        <dc:Bounds x="2570" y="140" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0nte1al_di" bpmnElement="Activity_0nte1al">
+        <dc:Bounds x="2130" y="290" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_10bwxsw_di" bpmnElement="Flow_10bwxsw">
         <di:waypoint x="1340" y="180" />
@@ -366,13 +369,14 @@
       <bpmndi:BPMNEdge id="Flow_0ffpqu5_di" bpmnElement="Flow_0ffpqu5">
         <di:waypoint x="1960" y="205" />
         <di:waypoint x="1960" y="330" />
+        <di:waypoint x="2130" y="330" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1968" y="265" width="15" height="14" />
+          <dc:Bounds x="2043" y="307" width="15" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0iry91v_di" bpmnElement="Flow_0iry91v">
-        <di:waypoint x="2010" y="370" />
-        <di:waypoint x="2420" y="370" />
+        <di:waypoint x="2230" y="330" />
+        <di:waypoint x="2420" y="330" />
         <di:waypoint x="2420" y="205" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1hcpzt4_di" bpmnElement="Flow_1hcpzt4">
@@ -424,9 +428,8 @@
         <di:waypoint x="440" y="1030" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataInputAssociation_10u2vln_di" bpmnElement="DataInputAssociation_10u2vln">
-        <di:waypoint x="1665" y="597" />
-        <di:waypoint x="2020" y="410" />
-        <di:waypoint x="2144" y="220" />
+        <di:waypoint x="1665" y="590" />
+        <di:waypoint x="2131" y="212" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataInputAssociation_0fnrace_di" bpmnElement="DataInputAssociation_0fnrace">
         <di:waypoint x="1780" y="335" />
@@ -435,11 +438,6 @@
       <bpmndi:BPMNEdge id="DataInputAssociation_1q55r4f_di" bpmnElement="DataInputAssociation_1q55r4f">
         <di:waypoint x="1615" y="603" />
         <di:waypoint x="859" y="383" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="DataOutputAssociation_16ij9on_di" bpmnElement="DataOutputAssociation_16ij9on">
-        <di:waypoint x="2320" y="220" />
-        <di:waypoint x="2320" y="605" />
-        <di:waypoint x="1665" y="610" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataInputAssociation_0bvssea_di" bpmnElement="DataInputAssociation_0bvssea">
         <di:waypoint x="620" y="895" />
@@ -452,6 +450,10 @@
       <bpmndi:BPMNEdge id="DataOutputAssociation_1ckoqzo_di" bpmnElement="DataOutputAssociation_1ckoqzo">
         <di:waypoint x="770" y="990" />
         <di:waypoint x="645" y="934" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_169iv7n_di" bpmnElement="DataOutputAssociation_169iv7n">
+        <di:waypoint x="2620" y="220" />
+        <di:waypoint x="1665" y="607" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

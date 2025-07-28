@@ -60,6 +60,18 @@ class CamundaWorkerTasks:
                          exception_handler=on_error, timeout_ms=600000)(self.consume_proof_response)
         self.worker.task(task_type="get_proof_from_pcf_registry",
                          exception_handler=on_error)(self.get_proof_from_pcf_registry)
+        self.worker.task(task_type="upload_proof_to_pcf_registry",
+                         exception_handler=on_error)(self.upload_proof_to_pcf_registry)
+        
+    def upload_proof_to_pcf_registry(self, proofing_document: dict) -> dict:
+        log_task_start("upload_proof_to_pcf_registry")
+
+        proofing_document = ProofingDocument.model_validate(proofing_document)
+        self.pcf_registry_service.upload_proofing_document(
+            proofing_document.productFootprint.id, proofing_document.proof)
+
+        log_task_completion("upload_proof_to_pcf_registry")
+        return {"proof_upload_status": "upload_successful", "proofing_document_id": proofing_document.productFootprint.id}
 
     def get_proof_from_pcf_registry(self, previous_product_footprint_id) -> dict:
         log_task_start("get_proof_from_pcf_registry")
@@ -100,16 +112,6 @@ class CamundaWorkerTasks:
 
         proofing_document.proof.append(proof_response)
         updated_proofing_document = proofing_document.model_dump()
-
-        # Save to file
-        import json
-        import os
-        file_path = "data/proof_documents_examples/proof_response.json"
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        
-        with open(file_path, 'w') as f:
-            json.dump(updated_proofing_document, f, indent=2)
-        print(f"Saved updated proofing document to: {file_path}")
 
         log_task_completion("consume_proof_response")
         return {

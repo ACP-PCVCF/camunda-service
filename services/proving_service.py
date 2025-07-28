@@ -36,7 +36,5 @@ class ProofingService:
     def receive_proof_response(self) -> ProofResponse:
         response_message = consume_messages_from_kafka(self.topic_in)
         proof_response = ProofResponse.model_validate_json(response_message)
-        self.pcf_registry_service.upload_proofing_document(
-            proof_response.productFootprintId, proof_response)
 
         return proof_response
