@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  camunda-service:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-08-15T22:23:47.819021645Z"
+    description: A Helm chart for the camunda-service microservice
+    digest: d40059453deecace4e33ae6d1ed126202978d5516605d30624a17bf735942666
+    name: camunda-service
+    type: application
+    urls:
+    - https://github.com/ACP-PCVCF/camunda-service/releases/download/camunda-service-0.1.0/camunda-service-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-08-15T22:23:47.819037515Z"
